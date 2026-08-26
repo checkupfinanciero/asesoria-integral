@@ -96,6 +96,32 @@ table.eq th.num{text-align:right;padding-right:18px}
 .rolechip{font-size:11px;color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:7px}
 .empty{color:var(--ink-3);font-style:italic;font-size:14px}
 .wrapx{overflow-x:auto}
+.acts{display:flex;gap:7px;justify-content:flex-end}
+.mini{background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);border-radius:8px;
+  padding:5px 11px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.mini:hover{border-color:var(--accent);color:var(--ink)}
+.mini.danger:hover{border-color:var(--bad);color:var(--bad)}
+.pinmask{font-family:var(--f-num);letter-spacing:.12em;color:var(--ink-2)}
+.head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.head .cap{margin:5px 0 0}
+.head .btn{margin-left:auto;padding:9px 16px;font-size:14px}
+.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:22px;background:rgba(4,10,20,.72)}
+.modal[hidden]{display:none}
+.modal .box{width:min(460px,100%);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 26px 22px}
+.modal h2{font-size:19px;font-weight:800;margin-bottom:4px}
+.modal .cap{margin:0 0 20px}
+.fgrid{display:grid;gap:14px}
+.f{display:flex;flex-direction:column;gap:5px}
+.f label{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.f input,.f select{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;width:100%}
+.f input:focus,.f select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(249,115,22,.18)}
+.f select option{background:var(--surface-2);color:var(--ink)}
+.f .hint{font-size:11.5px;color:var(--ink-3)}
+.modal .pie{display:flex;gap:10px;margin-top:22px}
+.modal .pie .btn{flex:1}
+.modal .ghost{background:transparent;color:var(--ink-2);border-color:var(--line)}
+.modal .ghost:hover{border-color:var(--ink-3);color:var(--ink);filter:none}
+.modal .msg{color:var(--bad);font-size:13.5px;min-height:20px;margin-top:12px;text-align:center}
 .err{background:rgba(242,99,126,.12);border:1px solid rgba(242,99,126,.4);color:var(--bad);
   border-radius:10px;padding:12px 15px;font-size:14px;margin-bottom:18px}
 </style>
@@ -139,9 +165,46 @@ table.eq th.num{text-align:right;padding-right:18px}
       <div id="chartBarras"></div>
     </div>
     <div class="card full">
+      <div class="head">
+        <div>
+          <h3>Asesores y accesos</h3>
+          <div class="cap">Da de alta, edita el PIN o suspende el acceso de cualquier miembro del equipo.</div>
+        </div>
+        <button class="btn" type="button" id="btnNuevo">+ Agregar asesor</button>
+      </div>
+      <div class="wrapx"><table class="eq" id="tablaU"></table></div>
+    </div>
+
+    <div class="card full">
       <h3>Detalle del equipo</h3>
       <div class="cap">Ordenado por quién lleva más tiempo sin usar la herramienta.</div>
       <div class="wrapx"><table class="eq" id="tabla"></table></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="box">
+    <h2 id="mTitulo">Agregar asesor</h2>
+    <div class="cap" id="mCap">El asesor entra a la herramienta con este PIN.</div>
+    <div class="fgrid">
+      <div class="f"><label for="mNombre">Nombre completo</label><input id="mNombre" autocomplete="off"></div>
+      <div class="f"><label for="mPin">PIN de acceso</label><input id="mPin" autocomplete="off" maxlength="10">
+        <span class="hint">Mínimo 4 caracteres, solo letras y números. Debe ser distinto al de los demás.</span></div>
+      <div class="f"><label for="mCorreo">Correo (opcional)</label><input id="mCorreo" type="email" autocomplete="off"></div>
+      <div class="f"><label for="mRol">Rol</label><select id="mRol">
+        <option value="asesor">Asesor — solo usa la herramienta</option>
+        <option value="admin">Administrador — además ve este tablero</option>
+      </select></div>
+      <div class="f"><label for="mActivo">Estado</label><select id="mActivo">
+        <option value="SI">Activo</option>
+        <option value="NO">Suspendido — no puede entrar</option>
+      </select></div>
+    </div>
+    <div class="msg" id="mMsg"></div>
+    <div class="pie">
+      <button class="btn ghost" type="button" id="mCancelar">Cancelar</button>
+      <button class="btn" type="button" id="mGuardar">Guardar</button>
     </div>
   </div>
 </div>
@@ -157,8 +220,8 @@ table.eq th.num{text-align:right;padding-right:18px}
    API   = la URL de tu aplicación web de Apps Script (termina en /exec)
    HOJA  = la URL de tu hoja de cálculo, para el botón "Administrar asesores"
    ===================================================================== */
-var API  = "https://script.google.com/macros/s/AKfycbyCEhufkPoPwucVg6Q37S63nnkGS3kPNwcKLXt3IwNTxLvaORKrWWkBuHLqN43KjwPf/exec";
-var HOJA = "https://docs.google.com/spreadsheets/d/1-BgHf0nu89obfpJ6fubtBntO8ovwBxaoVDTjDw3WTWY/edit?gid=827997594#gid=827997594";
+var API  = "";
+var HOJA = "";
 
 var REFRESCO = 20000;   // milisegundos entre actualizaciones
 var pin = "", timer = null;
@@ -319,6 +382,81 @@ document.addEventListener("mousemove",function(e){
 });
 document.addEventListener("scroll",hideTip,true);
 
+/* ---------- administración de asesores ---------- */
+var USERS=[], YO="";
+function cargarUsuarios(){
+  jsonp({action:"usuarios",pin:pin},function(r){
+    if(!r||!r.ok){ $("tablaU").innerHTML='<tbody><tr><td class="empty">'+esc((r&&r.error)||"No pude cargar la lista.")+'</td></tr></tbody>'; return; }
+    USERS=r.usuarios; YO=r.yo; pintarUsuarios();
+  });
+}
+function pintarUsuarios(){
+  if(!USERS.length){ $("tablaU").innerHTML='<tbody><tr><td class="empty">Aún no hay asesores dados de alta.</td></tr></tbody>'; return; }
+  $("tablaU").innerHTML=
+   '<thead><tr><th>Nombre</th><th>PIN</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody>'
+   +USERS.map(function(u,i){
+      var yo=(u.pin===YO);
+      return '<tr><td>'+esc(u.nombre)+(yo?'<span class="rolechip">tú</span>':'')+'</td>'
+       +'<td><span class="pinmask" data-pin="'+i+'" title="Clic para ver">••••</span></td>'
+       +'<td style="color:var(--ink-2);font-size:13.5px">'+(u.correo?esc(u.correo):"—")+'</td>'
+       +'<td>'+(u.rol==="admin"?'<span class="pill ok"><span class="g">★</span>Administrador</span>':'<span style="color:var(--ink-2)">Asesor</span>')+'</td>'
+       +'<td>'+(u.activo?'<span class="pill ok"><span class="g">✓</span>Activo</span>':'<span class="pill bad"><span class="g">●</span>Suspendido</span>')+'</td>'
+       +'<td><div class="acts"><button class="mini" type="button" data-edit="'+i+'">Editar</button>'
+       +(yo?'':'<button class="mini'+(u.activo?' danger':'')+'" type="button" data-tog="'+i+'">'+(u.activo?"Suspender":"Reactivar")+'</button>')
+       +'</div></td></tr>';
+    }).join("")+'</tbody>';
+}
+var editando=0;
+function abrirModal(u){
+  editando = u ? u.fila : 0;
+  $("mTitulo").textContent = u ? "Editar asesor" : "Agregar asesor";
+  $("mCap").textContent = u ? "Los cambios aplican de inmediato; su historial se conserva." : "El asesor entra a la herramienta con este PIN.";
+  $("mNombre").value = u ? u.nombre : "";
+  $("mPin").value = u ? u.pin : "";
+  $("mCorreo").value = u ? u.correo : "";
+  $("mRol").value = u ? u.rol : "asesor";
+  $("mActivo").value = (u && !u.activo) ? "NO" : "SI";
+  $("mMsg").textContent = "";
+  $("modal").hidden = false;
+  setTimeout(function(){ $("mNombre").focus(); },60);
+}
+function cerrarModal(){ $("modal").hidden = true; }
+
+$("btnNuevo").addEventListener("click",function(){ abrirModal(null); });
+$("mCancelar").addEventListener("click",cerrarModal);
+$("modal").addEventListener("click",function(e){ if(e.target===this) cerrarModal(); });
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!$("modal").hidden) cerrarModal(); });
+$("mGuardar").addEventListener("click",function(){
+  var b=this; b.disabled=true; b.textContent="Guardando…"; $("mMsg").textContent="";
+  jsonp({action:"guardar",pin:pin,fila:editando,nombre:$("mNombre").value,upin:$("mPin").value,
+         correo:$("mCorreo").value,rol:$("mRol").value,activo:$("mActivo").value},function(r){
+    b.disabled=false; b.textContent="Guardar";
+    if(r&&r.ok){ cerrarModal(); cargarUsuarios(); cargar(); }
+    else $("mMsg").textContent=(r&&r.error)||"No pude guardar.";
+  });
+});
+document.addEventListener("click",function(e){
+  var t=e.target;
+  if(t.dataset&&t.dataset.edit!==undefined){ abrirModal(USERS[+t.dataset.edit]); return; }
+  if(t.dataset&&t.dataset.tog!==undefined){
+    var u=USERS[+t.dataset.tog];
+    var msg=u.activo
+      ? "¿Suspender el acceso de "+u.nombre+"?\n\nNo podrá entrar a la herramienta. Su historial se conserva y puedes reactivarlo cuando quieras."
+      : "¿Reactivar el acceso de "+u.nombre+"?";
+    if(!confirm(msg)) return;
+    t.disabled=true;
+    jsonp({action:"estado",pin:pin,fila:u.fila,activo:u.activo?"NO":"SI"},function(r){
+      if(r&&r.ok){ cargarUsuarios(); cargar(); }
+      else { t.disabled=false; alert((r&&r.error)||"No pude cambiar el estado."); }
+    });
+    return;
+  }
+  if(t.dataset&&t.dataset.pin!==undefined){
+    var us=USERS[+t.dataset.pin];
+    t.textContent = (t.textContent.indexOf("•")>=0) ? us.pin : "••••";
+  }
+});
+
 /* ---------- carga ---------- */
 function cargar(){
   jsonp({action:"panel",pin:pin},function(r){
@@ -332,7 +470,7 @@ function cargar(){
 function arrancar(){
   $("gate").hidden=true; $("app").hidden=false;
   if(HOJA){ $("lnkHoja").href=HOJA; } else { $("lnkHoja").style.display="none"; }
-  cargar();
+  cargar(); cargarUsuarios();
   clearInterval(timer); timer=setInterval(cargar,REFRESCO);
 }
 function salir(msg){
