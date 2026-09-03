@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asesoría Integral en Línea · GAR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --bg:#071429; --bg-2:#0A1B33;
+  --surface:#0F2340; --surface-2:#16304F; --surface-3:#1B3A5E;
+  --line:#23405F; --line-soft:#1B3454;
+  --ink:#EAF1FB; --ink-2:#A6BAD6; --ink-3:#7089A8;
+  --accent:#F97316; --accent-soft:#FF9A4D; --accent-ink:#FF9A4D; --gold:#FBBF24;
+  --data:#4F8BDB; --gap:#DE6E22; --ok:#34C08B; --bad:#F2637E; --track:rgba(255,255,255,.06);
+  --rail:#050F1F; --rail-line:#1C3352;
+  --r:12px;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Instrument Sans","Segoe UI",Roboto,Arial,sans-serif;
+  --f-num:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.015em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.app{display:grid;grid-template-columns:266px minmax(0,1fr) 352px;min-height:100vh}
+.rail{background:var(--rail);color:var(--ink-2);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto;border-right:1px solid var(--rail-line)}
+.canvas{min-width:0;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--bg-2),var(--bg) 420px)}
+.diag{background:var(--surface);border-left:1px solid var(--line);position:sticky;top:0;height:100vh;overflow:auto}
+
+.brand{padding:22px 20px 17px;border-bottom:1px solid var(--rail-line)}
+.brand .mark{font-family:var(--f-display);font-weight:800;font-size:19px;color:#fff;letter-spacing:-.02em}
+.brand .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-top:6px}
+.steps{list-style:none;margin:0;padding:10px 10px 4px;flex:1}
+.steps button{width:100%;display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:baseline;background:none;border:0;text-align:left;padding:9px 10px;border-radius:9px;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s}
+.steps button:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+.steps button .n{font-family:var(--f-num);font-size:12px;opacity:.6;font-variant-numeric:tabular-nums}
+.steps button .t{font-size:14.5px;line-height:1.3}
+.steps button .m{font-family:var(--f-num);font-size:11px;opacity:.45}
+.steps li[aria-current="true"] button{background:linear-gradient(90deg,rgba(249,115,22,.20),rgba(249,115,22,.04));color:#fff;box-shadow:inset 2px 0 0 var(--accent)}
+.steps li[aria-current="true"] .n{opacity:1;color:var(--accent)}
+.rail-foot{padding:14px 16px 18px;border-top:1px solid var(--rail-line);display:flex;flex-direction:column;gap:10px}
+.timer{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.timer .val{font-family:var(--f-num);font-size:26px;font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
+.timer .cap{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3)}
+.rail-btns{display:flex;gap:6px}
+.rail-btns button{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--rail-line);color:var(--ink);padding:7px 8px;border-radius:8px;font-size:12.5px;cursor:pointer}
+.rail-btns button:hover{background:rgba(249,115,22,.18);border-color:var(--accent)}
+
+/* ---- área de captura: tema claro ---- */
+.canvas{
+  --bg:#EDF1F8; --bg-2:#FFFFFF;
+  --surface:#FFFFFF; --surface-2:#F5F8FC; --surface-3:#FFFFFF;
+  --line:#D5DEEA; --line-soft:#E6ECF4;
+  --ink:#0F1C2E; --ink-2:#41526B; --ink-3:#6C7E96;
+  --gold:#A65B12; --accent-ink:#B4530C; --data:#1B4FA0; --gap:#DD6412;
+  --ok:#15754D; --bad:#BF2F4C; --track:#E9EEF6;
+  color:var(--ink);
+}
+.canvas .card{box-shadow:0 1px 2px rgba(16,32,64,.05),0 10px 26px -18px rgba(16,32,64,.28)}
+.canvas .flow>div{box-shadow:0 1px 2px rgba(16,32,64,.05)}
+.canvas .topbar{box-shadow:0 1px 0 var(--line)}
+
+/* ---- dentro de la captura, los bloques de resumen siguen oscuros ---- */
+.reloj,.sum-hero{
+  --surface:#0F2340; --surface-2:#16304F;
+  --line:#23405F; --line-soft:#1B3454;
+  --ink:#EAF1FB; --ink-2:#A6BAD6; --ink-3:#7089A8;
+  --gold:#FBBF24; --accent-ink:#FF9A4D; --data:#4F8BDB; --gap:#DE6E22;
+  --ok:#34C08B; --bad:#F2637E; --track:rgba(255,255,255,.07);
+  color:var(--ink);
+}
+.sum-hero{background:var(--line-soft);border-color:var(--line-soft)}
+.canvas .reloj,.canvas .sum-hero{box-shadow:0 10px 30px -20px rgba(8,20,40,.7)}
+
+.topbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 24px;background:var(--bg-2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.topbar .who{font-size:13.5px;color:var(--ink-3)}
+.topbar .who b{color:var(--ink);font-weight:600}
+.spacer{flex:1}
+.tbtn{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 11px;font-size:12.5px;white-space:nowrap;cursor:pointer;color:var(--ink-2)}
+.tbtn:hover{border-color:var(--accent);color:var(--ink)}
+.tbtn.on{background:var(--accent);border-color:var(--accent);color:#231000;font-weight:600}
+.tbtn[hidden]{display:none}
+.diagov{position:fixed;inset:0;background:rgba(8,14,24,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60}
+.diagov[hidden]{display:none}
+.diagbox{background:#fff;color:#101828;border-radius:14px;padding:22px 24px;max-width:640px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.diagbox h3{margin:0 0 14px;font-size:18px}
+.drow{display:flex;gap:12px;padding:7px 0;border-top:1px solid #e9edf2;font-size:13.5px}
+.drow span{flex:0 0 130px;color:#667085}
+.drow b{font-weight:600;word-break:break-word}
+.dhint{font-size:13px;color:#475467;margin:14px 0 8px}
+.diagbox textarea{width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;padding:9px;border:1px solid #e3e7ec;border-radius:8px;resize:vertical;color:#101828;background:#f8fafc}
+.dacts{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.dacts .btn{text-decoration:none;display:inline-block}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);white-space:nowrap;cursor:default;padding:5px 9px;border:1px solid var(--line);border-radius:9px}
+.conn i{width:9px;height:9px;border-radius:50%;background:#9aa3ad;display:inline-block;flex:0 0 auto}
+.conn b{font-weight:600}
+.conn.ok i{background:#2fbf71}
+.conn.ok b{color:#1e8f52}
+.conn.bad i{background:#e5484d}
+.conn.bad b{color:#c0292e}
+.conn.wait i{background:#e6a700}
+a.tbtn{text-decoration:none;display:inline-block}
+a.tbtn.admin{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));color:var(--accent-ink);font-weight:600}
+a.tbtn.admin:hover{background:var(--accent);border-color:var(--accent);color:#231000}
+
+.stage{padding:30px 34px 40px;max-width:960px;width:100%}
+.eyebrow{font-family:var(--f-num);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.stage h2{font-size:clamp(26px,2.7vw,35px);font-weight:800;line-height:1.12}
+.lede{color:var(--ink-2);margin:11px 0 0;max-width:62ch;font-size:16.5px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin-top:22px}
+.card>h3{font-size:12.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.grid{display:grid;gap:14px 18px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.span2{grid-column:span 2}
+@media (max-width:1020px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}.span2{grid-column:auto}}
+
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f label{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.f .hint{font-size:11.5px;color:var(--ink-3)}
+input,select,textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;width:100%;color:var(--ink);transition:border-color .12s,background .12s}
+input::placeholder,textarea::placeholder{color:var(--ink-3)}
+select option{background:var(--surface-2);color:var(--ink)}
+input:hover,select:hover,textarea:hover{border-color:var(--ink-3)}
+input:focus,select:focus,textarea:focus{background:var(--surface-3);border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(249,115,22,.18)}
+input[type=number],input.money{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+input[type=date],input[type=time]{color-scheme:dark}
+.canvas input[type=date],.canvas input[type=time]{color-scheme:light}
+textarea{min-height:74px;resize:vertical}
+.ro{background:transparent;border-style:dashed;color:var(--gold);font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.chk{display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:var(--ink-2)}
+.chk input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--accent)}
+
+table.rep{width:100%;border-collapse:collapse}
+table.rep th{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);text-align:left;font-weight:600;padding:0 8px 7px 0}
+table.rep td{padding:0 8px 8px 0;vertical-align:top}
+table.rep td:last-child,table.rep th:last-child{padding-right:0}
+.wrapx{overflow-x:auto}
+.mini{background:none;border:1px dashed var(--line);color:var(--ink-2);border-radius:8px;padding:7px 11px;font-size:13px;cursor:pointer}
+.mini:hover{border-style:solid;border-color:var(--accent);color:var(--ink)}
+.del{background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:17px;line-height:1;padding:8px 4px}
+.del:hover{color:var(--gap)}
+
+/* tarjeta destacada: el retiro */
+.card.destacada{position:relative;border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.card.destacada::before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+.card.destacada>h3{color:var(--accent-ink);font-size:13.5px;letter-spacing:.09em}
+.card.destacada .sub{font-size:13.5px;color:var(--ink-2);margin:-10px 0 18px;max-width:60ch}
+.destaca{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+@media(max-width:820px){.destaca{grid-template-columns:1fr}}
+.destaca .b{border:1px solid var(--line);border-radius:11px;padding:15px 16px 16px;background:var(--surface-2)}
+.destaca .b.fuerte{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.destaca .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);line-height:1.35}
+.destaca .v{font-family:var(--f-num);font-size:25px;font-weight:600;margin-top:6px;letter-spacing:-.025em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.destaca .b.fuerte .v{color:var(--accent-ink)}
+.destaca .n{font-size:12px;color:var(--ink-3);margin-top:4px}
+
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+@media(max-width:760px){.flow{grid-template-columns:repeat(2,1fr)}}
+.flow>div{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--data);border-radius:var(--r);padding:16px 16px 18px}
+.flow>div:nth-child(3),.flow>div:nth-child(4){border-top-color:var(--accent)}
+.flow .k{font-family:var(--f-num);font-size:12px;color:var(--ink-3)}
+.flow .h{font-family:var(--f-display);font-weight:700;font-size:18px;margin:6px 0 5px;color:#fff}
+.flow .p{font-size:13.5px;color:var(--ink-2);line-height:1.42}
+
+.navbar{display:flex;gap:10px;align-items:center;padding:18px 34px 40px;max-width:960px;flex-wrap:wrap}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#231000;border-radius:9px;padding:11px 20px;font-size:15px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink-3);color:var(--ink);filter:none}
+
+/* prioridades */
+.prios{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px}
+.prio{position:relative;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;cursor:pointer;text-align:left;color:var(--ink-2);font-size:14.5px;transition:border-color .12s,background .12s}
+.prio:hover{border-color:var(--ink-3);color:var(--ink)}
+.prio .ic{font-size:19px;line-height:1}
+.prio.on{border-color:var(--accent);background:rgba(249,115,22,.13);color:#fff;font-weight:600}
+.prio .rank{margin-left:auto;width:25px;height:25px;border-radius:50%;background:var(--accent);color:#231000;font-family:var(--f-num);font-weight:600;font-size:13px;display:grid;place-items:center;flex:none}
+.prio .rank.off{display:none}
+.priolist{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.pill{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:6px 13px 6px 7px;font-size:13.5px}
+.pill b{width:21px;height:21px;border-radius:50%;background:var(--accent);color:#231000;font-family:var(--f-num);font-size:12px;display:grid;place-items:center}
+
+/* diagnóstico */
+.diag-h{padding:16px 18px 12px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:8px}
+.diag-h h3{font-size:12.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--gold)}
+.diag-h span{font-size:11.5px;color:var(--ink-3);margin-left:auto}
+.diag-b{padding:16px 18px 34px;display:flex;flex-direction:column;gap:20px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:10px;overflow:hidden}
+.kpi{background:var(--surface-2);padding:11px 12px}
+.kpi .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);line-height:1.3}
+.kpi .v{font-family:var(--f-num);font-size:17px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi.neg .v{color:var(--gap)}
+.kpi.pos .v{color:var(--ok)}
+
+.meter{display:flex;flex-direction:column;gap:6px}
+.meter .top{display:flex;align-items:baseline;gap:8px}
+.meter .name{font-size:13.5px;font-weight:600}
+.meter .pct{margin-left:auto;font-family:var(--f-num);font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.track{height:12px;border-radius:5px;background:var(--track);border:1px solid var(--line-soft);display:flex;overflow:hidden}
+.track .fill{background:var(--data);height:100%;border-radius:4px 0 0 4px}
+.track .rest{background:var(--gap);height:100%;border-radius:0 4px 4px 0;margin-left:2px}
+.track .fill:only-child,.track .rest:only-child{border-radius:4px;margin-left:0}
+.meter .row{display:flex;gap:10px;font-family:var(--f-num);font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.meter .row .g{color:var(--gap);font-weight:600}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-2);align-items:center;flex-wrap:wrap}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+.note{font-size:12px;color:var(--ink-3);line-height:1.45}
+.empty{font-size:13px;color:var(--ink-3);font-style:italic}
+
+/* guion */
+.guion{position:fixed;right:0;top:0;height:100vh;width:min(430px,92vw);background:var(--surface);border-left:1px solid var(--line);box-shadow:-14px 0 40px -18px #000;transform:translateX(102%);transition:transform .22s ease;z-index:40;display:flex;flex-direction:column}
+.guion.open{transform:none}
+.guion header{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.guion header h3{font-size:15px;font-weight:700}
+.guion header button{margin-left:auto;background:none;border:0;font-size:22px;color:var(--ink-3);cursor:pointer;line-height:1}
+.guion .body{padding:18px 20px 40px;overflow:auto}
+.guion .warn{background:rgba(249,115,22,.14);border:1px solid rgba(249,115,22,.45);color:var(--accent-soft);border-radius:9px;padding:10px 12px;font-size:12.5px;margin-bottom:16px}
+.guion h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin:18px 0 7px}
+.guion p{margin:0 0 10px;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.guion .say{border-left:3px solid var(--accent);padding-left:12px;font-style:italic;color:var(--ink)}
+.guion ul{margin:0 0 10px;padding-left:19px;font-size:14px;color:var(--ink-2)}
+.guion li{margin-bottom:5px}
+
+/* resumen */
+.sum-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden;margin-top:22px}
+@media(max-width:760px){.sum-hero{grid-template-columns:1fr}}
+.sum-hero>div{background:var(--surface);padding:18px 18px 20px}
+.sum-hero .k{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-3)}
+.sum-hero .v{font-family:var(--f-num);font-size:27px;font-weight:500;margin-top:6px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.sum-hero .v.gap{color:var(--gap)}
+.sum-hero .v.acc{color:var(--gold)}
+dl.kv{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 18px;font-size:14.5px}
+dl.kv dt{color:var(--ink-3)}
+dl.kv dd{margin:0;font-weight:500}
+
+/* reloj del patrimonio */
+.reloj{background:linear-gradient(160deg,#0B1E39,#081627);border:1px solid var(--line);border-radius:16px;padding:26px 24px 24px;margin-top:22px}
+.reloj .rh{text-align:center;margin-bottom:22px}
+.reloj .rh h3{font-size:clamp(20px,2.2vw,26px);font-weight:800;color:#fff;letter-spacing:.01em}
+.reloj .rh p{margin:7px 0 0;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.etapas{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:820px){.etapas{grid-template-columns:repeat(2,1fr)}}
+.etapa{position:relative;background:rgba(255,255,255,.028);border:1px solid var(--line-soft);border-radius:12px;padding:26px 14px 18px;text-align:center}
+.etapa.here{border-color:var(--accent);background:linear-gradient(180deg,rgba(249,115,22,.16),rgba(249,115,22,.03))}
+.etapa .aqui{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#231000;font-size:10px;font-weight:800;letter-spacing:.09em;padding:5px 12px;border-radius:999px;white-space:nowrap}
+.etapa .dec{font-family:var(--f-display);font-size:30px;font-weight:800;color:var(--ink-3);line-height:1}
+.etapa.here .dec{color:var(--accent)}
+.etapa .ic{font-size:26px;margin:12px 0 10px;line-height:1}
+.etapa .nm{font-family:var(--f-display);font-size:14.5px;font-weight:700;color:#fff;margin-bottom:9px;line-height:1.25}
+.etapa .li{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.eje{margin:26px 4px 0;position:relative}
+.eje .barra{height:7px;border-radius:999px;background:rgba(255,255,255,.1);position:relative}
+.eje .dot{position:absolute;top:50%;width:19px;height:19px;border-radius:50%;background:var(--accent);border:3px solid #0B1E39;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(249,115,22,.28)}
+.eje .ticks{display:flex;justify-content:space-between;margin-top:9px;font-family:var(--f-num);font-size:11.5px;color:var(--ink-3)}
+.hack{margin-top:24px;border:1px solid rgba(251,191,36,.42);background:rgba(251,191,36,.07);border-radius:12px;padding:18px 20px}
+.hack h4{color:var(--gold);font-size:13.5px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:10px}
+.hack p{margin:0 0 9px;font-size:14.5px;color:var(--ink-2);line-height:1.55}
+.hack p:last-child{margin-bottom:0}
+.hack strong{color:#fff}
+
+/* acceso */
+.gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;
+  background:radial-gradient(120% 90% at 50% 0%,#12294A 0%,#071429 62%)}
+.gate[hidden]{display:none}
+.gate .box{width:min(430px,100%);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px 30px 28px;text-align:center}
+.gate h1{font-size:23px;font-weight:800;color:#fff}
+.gate .sub{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:8px 0 22px}
+.gate p{color:var(--ink-2);font-size:14.5px;margin:0 0 18px}
+.gate input{text-align:center;font-family:var(--f-num);font-size:26px;letter-spacing:.34em;padding:14px 12px}
+.gate .btn{width:100%;margin-top:14px;padding:13px}
+.gate .err{color:var(--bad);font-size:13.5px;margin-top:14px;min-height:20px}
+.gate .pie{font-size:11.5px;color:var(--ink-3);margin:20px 0 0;line-height:1.5}
+body.locked{overflow:hidden}
+body.present .stage{max-width:1140px}
+body.present{font-size:17.5px}
+body.present .rail{display:none}
+body.present .app{grid-template-columns:minmax(0,1fr) 380px}
+
+@media (max-width:1180px){
+  .app{grid-template-columns:1fr}
+  .rail{position:static;height:auto;flex-direction:row;align-items:center;overflow-x:auto;border-right:0;border-bottom:1px solid var(--rail-line)}
+  .brand{border-bottom:0;border-right:1px solid var(--rail-line);white-space:nowrap}
+  .steps{display:flex;padding:8px;gap:4px}
+  .steps button{width:auto;white-space:nowrap;grid-template-columns:auto auto}
+  .rail-foot{border-top:0;border-left:1px solid var(--rail-line);flex-direction:row;align-items:center}
+  .diag{position:static;height:auto;border-left:0;border-top:1px solid var(--line)}
+  body.present .app{grid-template-columns:1fr}
+}
+
+/* ============================================================
+   PDF de una página — documento propio, no la pantalla impresa
+   ============================================================ */
+#onepage{position:fixed;left:-6000px;top:0;width:192mm;visibility:hidden;pointer-events:none;zoom:1}
+@media print{
+  @page{size:A4 portrait;margin:10mm}
+  html,body{background:#fff!important}
+  body{font-size:10.4pt;line-height:1.38;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .app,.guion,.gate,.tip{display:none!important}
+  #onepage{position:static;left:auto;top:auto;width:auto;visibility:visible;color:#16233A}
+  #onepage *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+#onepage{--op-navy:#0D1F3C;--op-navy2:#16304F;--op-line:#CFDAE8;--op-ink:#16233A;
+  --op-ink2:#4B5C77;--op-ink3:#7488A1;--op-acc:#E8710F;--op-gold:#F2B233;
+  --op-data:#1B4FA0;--op-gap:#DD6412}
+#onepage .op-h{background:var(--op-navy);color:#fff;border-radius:7px;padding:11px 15px;
+  display:flex;align-items:center;gap:12px}
+#onepage .op-h .t{font-family:var(--f-display);font-weight:800;font-size:15.7pt;letter-spacing:-.02em}
+#onepage .op-h .s{font-size:7.7pt;letter-spacing:.16em;text-transform:uppercase;color:var(--op-gold);margin-top:2px}
+#onepage .op-h .who{margin-left:auto;text-align:right;font-size:9.3pt;color:#C7D6EA;line-height:1.4}
+#onepage .op-h .who b{display:block;color:#fff;font-size:12.8pt;font-family:var(--f-display);font-weight:700}
+
+#onepage .op-reloj{background:var(--op-navy);border-radius:7px;padding:11px 14px 12px;margin-top:6px;color:#fff}
+#onepage .op-reloj .rt{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
+#onepage .op-reloj .rt b{font-family:var(--f-display);font-size:11.0pt;font-weight:800}
+#onepage .op-reloj .rt span{font-size:7.4pt;letter-spacing:.14em;text-transform:uppercase;color:var(--op-gold)}
+#onepage .decs{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+#onepage .dec{position:relative;border:1px solid #2A4368;border-radius:8px;padding:15px 8px 12px;text-align:center}
+#onepage .dec.here{border-color:var(--op-acc);border-width:1.5px;background:rgba(232,113,15,.16)}
+#onepage .dec .aqui{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--op-acc);
+  color:#2A1200;font-size:6.2pt;font-weight:800;letter-spacing:.09em;padding:2.5px 9px;border-radius:99px;white-space:nowrap}
+#onepage .dec .d{font-family:var(--f-display);font-weight:800;font-size:20pt;color:#8FA6C4;line-height:1}
+#onepage .dec.here .d{color:var(--op-acc)}
+#onepage .dec .ic{font-size:15pt;line-height:1;margin:7px 0 6px}
+#onepage .dec .n{font-family:var(--f-display);font-size:9pt;font-weight:700;color:#fff;line-height:1.2;margin-bottom:6px}
+#onepage .dec .li{font-size:7.6pt;color:#BFD1E8;line-height:1.45}
+#onepage .eje2{margin-top:13px}
+#onepage .eje2 .b{height:5px;border-radius:3px;background:#25405F;position:relative}
+#onepage .eje2 .p{position:absolute;top:-4.5px;width:14px;height:14px;border-radius:50%;
+  background:var(--op-acc);border:2px solid var(--op-navy);transform:translateX(-50%)}
+#onepage .eje2 .tk{display:flex;justify-content:space-between;font-family:var(--f-num);font-size:7.0pt;color:#8FA6C4;margin-top:3px}
+#onepage .op-hack{margin-top:13px;border:1px solid rgba(242,178,51,.5);background:rgba(242,178,51,.1);
+  border-radius:7px;padding:10px 13px;font-size:8.6pt;color:#E8EFF9;line-height:1.45}
+#onepage .op-hack p{margin:0 0 5px}
+#onepage .op-hack p:last-child{margin:0}
+#onepage .op-hack .ht{color:var(--op-gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:7.4pt;margin-bottom:6px}
+#onepage .op-hack b{color:var(--op-gold)}
+
+#onepage .cols{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+#onepage .bx{border:1px solid var(--op-line);border-radius:7px;padding:10px 13px 12px}
+#onepage .bx h4{font-family:var(--f-display);font-size:8.1pt;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--op-acc);margin:0 0 7px}
+#onepage .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:9.3pt}
+#onepage .kv dt{color:var(--op-ink3)}
+#onepage .kv dd{margin:0;text-align:right;font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:500}
+#onepage .kv dd.pos{color:#127A50}
+#onepage .kv dd.neg{color:var(--op-gap)}
+
+#onepage .m{margin-bottom:9px}
+#onepage .m:last-child{margin-bottom:0}
+#onepage .m .top{display:flex;align-items:baseline;font-size:9.0pt;font-weight:600}
+#onepage .m .top i{margin-left:auto;font-style:normal;font-family:var(--f-num);font-size:7.9pt;color:var(--op-ink3);font-weight:400}
+#onepage .m .bar{height:8px;border-radius:3px;background:#EAEFF6;display:flex;overflow:hidden;margin:3px 0 2px}
+#onepage .m .bar u{display:block;height:100%}
+#onepage .m .bar .f{background:var(--op-data)}
+#onepage .m .bar .g{background:var(--op-gap);margin-left:1px}
+#onepage .m .r{font-family:var(--f-num);font-size:7.9pt;color:var(--op-ink2);display:flex;gap:9px;flex-wrap:wrap}
+#onepage .m .r em{font-style:normal;color:var(--op-gap);font-weight:600}
+#onepage .lg{font-size:7.7pt;color:var(--op-ink3);margin:-2px 0 7px}
+#onepage .lg i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:3px;vertical-align:-1px}
+
+#onepage table.sn{width:100%;border-collapse:collapse;font-size:9.3pt}
+#onepage table.sn th{font-size:7.7pt;text-transform:uppercase;letter-spacing:.07em;color:var(--op-ink3);
+  text-align:left;font-weight:600;padding:0 6px 4px 0;border-bottom:1px solid var(--op-line)}
+#onepage table.sn td{padding:4px 6px 4px 0;border-bottom:1px solid #EDF1F7}
+#onepage table.sn tr:last-child td{border-bottom:0}
+#onepage table.sn .n{text-align:right;font-family:var(--f-num);font-variant-numeric:tabular-nums}
+#onepage .tot{display:flex;font-size:9.3pt;font-weight:700;margin-top:6px;padding-top:5px;border-top:1.5px solid var(--op-line)}
+#onepage .tot span:last-child{margin-left:auto;font-family:var(--f-num);color:var(--op-gap)}
+
+#onepage .op-fin{background:var(--op-navy);border-radius:7px;padding:12px 15px 13px;margin-top:6px;color:#fff}
+#onepage .op-fin h4{font-family:var(--f-display);font-size:8.1pt;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--op-gold);margin:0 0 8px}
+#onepage .op-fin .g3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:9px}
+#onepage .op-fin .k{font-size:7.4pt;letter-spacing:.08em;text-transform:uppercase;color:#96AECB}
+#onepage .op-fin .v{font-family:var(--f-num);font-size:15.1pt;font-weight:600;color:var(--op-gold);margin-top:2px;letter-spacing:-.02em}
+#onepage .op-fin .v.sm{font-size:10.4pt;font-family:var(--f-body);font-weight:600;color:#fff;letter-spacing:0}
+#onepage .op-fin .n{font-size:7.7pt;color:#96AECB;margin-top:2px}
+#onepage .prios2{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+#onepage .prios2 span{border:1px solid #2F4A70;border-radius:99px;padding:2px 8px;font-size:8.6pt;color:#E4EDF9}
+#onepage .prios2 span b{color:var(--op-acc)}
+#onepage .contacto{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:11px;
+  border-top:1px solid #2A4368}
+#onepage .contacto .yo{font-size:7.4pt;color:#96AECB;letter-spacing:.08em;text-transform:uppercase}
+#onepage .contacto .yo b{display:block;font-family:var(--f-display);font-size:10.4pt;color:#fff;letter-spacing:0;text-transform:none;margin-top:2px}
+#onepage .contacto .ligas{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+#onepage .contacto a{display:inline-block;text-decoration:none;border-radius:99px;padding:6px 14px;
+  font-size:8.4pt;font-weight:600;border:1px solid var(--op-acc);color:var(--op-acc)}
+#onepage .contacto a.solido{background:var(--op-acc);color:#2A1200;border-color:var(--op-acc)}
+#onepage .op-pie{display:flex;font-size:7.4pt;color:var(--op-ink3);margin-top:6px;gap:10px}
+#onepage .op-pie span:last-child{margin-left:auto}
+</style>
+
+</head>
+<body>
+<div class="gate" id="gate" hidden>
+  <div class="box">
+    <h1>Asesoría Integral</h1>
+    <div class="sub">GAR · Sesión en línea</div>
+    <p>Ingresa tu PIN de asesor para comenzar.</p>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="••••" aria-label="PIN de asesor">
+    <button class="btn" type="button" id="btnEntrar">Entrar</button>
+    <div class="err" id="gateErr"></div>
+    <p class="pie">Tu director da de alta los PIN. Los datos del prospecto se guardan solo en esta computadora; al servidor únicamente se reporta tu actividad.</p>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="mark">Asesoría Integral</div>
+      <div class="sub">GAR · Sesión en línea</div>
+    </div>
+    <ul class="steps" id="steps"></ul>
+    <div class="rail-foot">
+      <div class="timer"><span class="cap">Sesión</span><span class="val" id="clock">00:00</span></div>
+      <div class="rail-btns">
+        <button type="button" id="btnTimer">Iniciar</button>
+        <button type="button" id="btnReset">Reiniciar</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="canvas">
+    <div class="topbar noprint">
+      <div class="who"><b id="whoName">Sin prospecto</b><span id="whoMeta"></span></div>
+      <div class="spacer"></div>
+      <span class="conn" id="conn" title="Estado de la conexión con el servidor GAR"><i></i><b>Sin conexión</b></span>
+      <a class="tbtn admin" id="btnPanel" href="admin.html" target="_blank" rel="noopener" hidden>Tablero del equipo</a>
+      <button class="tbtn" id="btnNueva" type="button">Nueva asesoría</button>
+      <button class="tbtn" id="btnGuion" type="button">Guion del asesor</button>
+      <button class="tbtn" id="btnPresent" type="button">Modo presentación</button>
+      <button class="tbtn" id="btnSave" type="button">Descargar datos</button>
+      <button class="tbtn" id="btnLoad" type="button">Cargar</button>
+      <button class="tbtn" id="btnPrint" type="button">Imprimir / PDF</button>
+      <button class="tbtn" id="btnSalir" type="button" hidden>Cerrar sesión</button>
+      <input type="file" id="fileIn" accept="application/json" hidden>
+    </div>
+    <div id="stage"></div>
+    <div class="navbar noprint">
+      <button class="btn ghost" id="prev" type="button">Atrás</button>
+      <button class="btn" id="next" type="button">Siguiente</button>
+      <span class="note" id="stepTime"></span>
+    </div>
+  </div>
+
+  <aside class="diag noprint">
+    <div class="diag-h"><h3>Diagnóstico</h3><span id="diagLive">en vivo</span></div>
+    <div class="diag-b" id="diag"></div>
+  </aside>
+</div>
+
+<div id="onepage" aria-hidden="true"></div>
+
+<div class="guion" id="guionPanel" aria-hidden="true">
+  <header><h3>Guion del asesor</h3><button type="button" id="guionClose" aria-label="Cerrar">×</button></header>
+  <div class="body" id="guionBody"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   CONFIGURACIÓN
+   Pega entre las comillas la URL de tu aplicación web de Apps Script
+   (la que termina en /exec). Si la dejas vacía, la herramienta funciona
+   igual que siempre: sin PIN y sin reportar actividad.
+   ===================================================================== */
+var API = "https://script.google.com/macros/s/AKfycbyCEhufkPoPwucVg6Q37S63nnkGS3kPNwcKLXt3IwNTxLvaORKrWWkBuHLqN43KjwPf/exec";
+
+var S = {
+  meta:{asesor:"",fecha:new Date().toISOString().slice(0,10),confidencial:false},
+  p:{nombre:"",nacimiento:"",regimen:"",ocupacion:"",antiguedad:"",hobbies:"",civil:"",salud:"",fuma:"No",cp:"",email:"",tel:""},
+  dep:[],
+  fin:{ingreso:"",adicional:"",egresos:"",ahorroMes:"",ahorroAcum:"",deudas:"",tarjetas:""},
+  prot:{vidaSA:"",vidaMon:"MXN",vidaPrima:"",vidaPrest:"No",vidaInteres:"No",vidaTasa:"",invSA:"",
+        gmmSA:"",gmmPrima:"",gmmDed:"",gmmCoa:"",gmmPrest:"No",
+        autoCob:"",autoPrima:"",autoRenov:"",autoPrest:"No",
+        hogCob:"",hogDed:"",hogCoa:"",
+        empSocios:"",empClave:"",empInmueble:"",empBienes:"",tc:"18.50"},
+  lv:{edadInicio:"",edadActual:"",jubilacion:"65",esperanza:"85",primerIngreso:"",pctAhorro:"10",
+      necMensual:"",aniosGastos:"7",aniosIngresos:"7",metaDesc:"",metaMonto:"",pctRetiro:"70"},
+  suenos:[],
+  traje:{prioridades:[],plazo:"",plazoOtro:"",moneda:"MXN",deducible:"No",presupuesto:"",presupuestoOtro:""},
+  cierre:{fecha:"",hora:"",acompania:"",llevas:"",valor:"",compromisos:"Presentar una solución a la medida.\nSer tu agente de seguros y darte apoyo y asesoría cuando lo necesites."},
+  ref:[{},{},{},{},{},{}]
+};
+
+var DEFAULTS=JSON.stringify(S);
+var KEY="gar_asesoria_online_v2";
+try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); for(var k in o){ if(k in S) S[k]=o[k]; } } }catch(e){}
+if(!Array.isArray(S.traje.prioridades)) S.traje.prioridades=[];
+if(!Array.isArray(S.suenos)) S.suenos=[];
+if(!S.suenos.length && (S.lv.metaDesc||S.lv.metaMonto)){          // migra la meta única de versiones anteriores
+  S.suenos.push({nombre:S.lv.metaDesc||"",monto:S.lv.metaMonto||"",anios:""});
+  S.lv.metaDesc=""; S.lv.metaMonto="";
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+
+function n(v){ var x=parseFloat(String(v==null?"":v).replace(/[^0-9.\-]/g,"")); return isFinite(x)?x:0; }
+var fmt0=new Intl.NumberFormat("es-MX",{maximumFractionDigits:0});
+function money(v){ if(!isFinite(v)) v=0; return "$"+fmt0.format(Math.round(v)); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function waLink(v){
+  var d=String(v||"").replace(/[^0-9]/g,"");
+  if(!d) return "";
+  if(d.length===10) d="52"+d;                 // celular mexicano sin lada de país
+  return "https://wa.me/"+d;
+}
+function waTexto(v){
+  var d=String(v||"").replace(/[^0-9]/g,"");
+  if(d.length===12&&d.slice(0,2)==="52") d=d.slice(2);
+  return d.length===10 ? d.slice(0,3)+" "+d.slice(3,6)+" "+d.slice(6) : String(v||"");
+}
+function agendaLink(v){
+  v=String(v||"").trim();
+  if(!v) return "";
+  return /^https?:\/\//i.test(v) ? v : "https://"+v;
+}
+function fecha(iso){ if(!iso) return ""; var d=new Date(iso+"T12:00:00"); if(isNaN(d)) return iso; return d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
+function edadDe(iso){ if(!iso) return 0; var d=new Date(iso); if(isNaN(d)) return 0; var t=new Date(),a=t.getFullYear()-d.getFullYear(),m=t.getMonth()-d.getMonth(); if(m<0||(m===0&&t.getDate()<d.getDate())) a--; return a>0&&a<120?a:0; }
+
+/* ---------- catálogos ---------- */
+var PRIORIDADES=[
+ {id:"proteccion",  t:"Protección",         ic:"🛡️"},
+ {id:"ahorro",      t:"Ahorro / Retiro",    ic:"🐷"},
+ {id:"protahorro",  t:"Protección y ahorro",ic:"🎯"},
+ {id:"educacion",   t:"Educación",          ic:"🎓"},
+ {id:"salud",       t:"Salud / GMM",        ic:"🏥"},
+ {id:"metas",       t:"Metas",              ic:"✨"},
+ {id:"auto",        t:"Auto",               ic:"🚗"},
+ {id:"hogar",       t:"Hogar",              ic:"🏠"},
+ {id:"mascota",     t:"Mascota",            ic:"🐾"},
+ {id:"empresa",     t:"Empresarial",        ic:"💼"}
+];
+function prioT(id){ for(var i=0;i<PRIORIDADES.length;i++) if(PRIORIDADES[i].id===id) return PRIORIDADES[i]; return {t:id,ic:""}; }
+
+var ETAPAS=[
+ {dec:"20s",min:20,max:29,ic:"🌱",nm:"Exploración y siembra",li:["Inicios laborales","Menores responsabilidades","Hábitos de ahorro"]},
+ {dec:"30s",min:30,max:39,ic:"🏠",nm:"Expansión y estructura",li:["Incremento de ingresos","Formación de familia","Adquisición de activos"]},
+ {dec:"40s",min:40,max:49,ic:"📈",nm:"Aceleración y estabilidad",li:["Máximo potencial de ingresos","Consolidación profesional","Protección patrimonial"]},
+ {dec:"50s",min:50,max:59,ic:"🌳",nm:"Consolidación y blindaje",li:["Reducción de deudas grandes","Optimización fiscal","Preparación final para el retiro"]},
+ {dec:"60s+",min:60,max:200,ic:"🌅",nm:"Cosecha y libertad",li:["Disfrute del patrimonio","Ingresos pasivos","Tranquilidad y legado"]}
+];
+
+var PLAZOS=[
+ {v:"5",   t:"5 años (aportas 5 y dejas trabajar el resto)"},
+ {v:"10",  t:"10 años (el plazo más usado)"},
+ {v:"15",  t:"15 años"},
+ {v:"20",  t:"20 años"},
+ {v:"ea65",t:"Hasta los 65 (edad alcanzada 65)"},
+ {v:"ea99",t:"Hasta los 99 (vitalicio)"},
+ {v:"otro",t:"Otro plazo"}
+];
+function plazoTexto(c){
+  var v=S.traje.plazo;
+  if(!v) return "por definir";
+  if(v==="otro") return S.traje.plazoOtro||"por definir";
+  if(v==="ea65") return "hasta los 65 años"+(c&&c.edadActual?" ("+Math.max(0,65-c.edadActual)+" años de aportación)":"");
+  if(v==="ea99") return "vitalicio, hasta los 99 años";
+  return v+" años de aportación";
+}
+function plazoAnios(c){
+  var v=S.traje.plazo;
+  if(v==="ea65") return c.edadActual?Math.max(0,65-c.edadActual):0;
+  if(v==="ea99") return c.edadActual?Math.max(0,99-c.edadActual):0;
+  if(v==="otro") return n(S.traje.plazoOtro);
+  return n(v);
+}
+
+/* ---------- cálculo ---------- */
+function calc(){
+  var c={};
+  c.ingresoMes=n(S.fin.ingreso)+n(S.fin.adicional);
+  c.egresosMes=n(S.fin.egresos);
+  c.excedente=c.ingresoMes-c.egresosMes;
+  c.ingresoAnual=c.ingresoMes*12;
+  c.gastoAnual=c.egresosMes*12;
+  c.edadActual=n(S.lv.edadActual)||edadDe(S.p.nacimiento);
+  c.edadInicio=n(S.lv.edadInicio);
+  c.jubilacion=n(S.lv.jubilacion);
+  c.esperanza=n(S.lv.esperanza);
+  c.aniosLab=Math.max(0,c.edadActual-c.edadInicio);
+  c.etapaProd=Math.max(0,c.jubilacion-c.edadActual);
+  c.etapaRetiro=Math.max(0,c.esperanza-c.jubilacion);
+  c.restanGanar=c.ingresoAnual*c.etapaProd;
+  var primero=n(S.lv.primerIngreso);
+  c.mediaIngreso=c.aniosLab?(primero+c.ingresoAnual)/2:0;
+  c.hasGenerado=c.mediaIngreso*c.aniosLab;
+  c.pctAhorro=n(S.lv.pctAhorro)/100;
+  c.ahorroMinimo=c.hasGenerado*c.pctAhorro;
+  c.ahorroAcum=n(S.fin.ahorroAcum);
+  var necMes=S.lv.necMensual===""?c.egresosMes:n(S.lv.necMensual);
+  c.necMensual=necMes;
+  c.aniosGastos=n(S.lv.aniosGastos);
+  c.aniosIngresos=n(S.lv.aniosIngresos);
+  c.fallecer=necMes*12*c.aniosGastos;
+  c.invalidez=c.ingresoAnual*c.aniosIngresos;
+  c.pctRetiro=n(S.lv.pctRetiro)/100;
+  c.rentaRetiro=c.ingresoAnual*c.pctRetiro;
+  c.capitalRetiro=c.rentaRetiro*c.etapaRetiro;
+  c.suenos=S.suenos.map(function(x){ return {nombre:(x.nombre||"").trim(), monto:n(x.monto), anios:n(x.anios)}; });
+  c.suenosTotal=c.suenos.reduce(function(a,b){ return a+b.monto; },0);
+  var tc=n(S.prot.tc)||1;
+  c.saVida=n(S.prot.vidaSA)*(S.prot.vidaMon==="USD"?tc:1);
+  c.saInv=n(S.prot.invSA)*(S.prot.vidaMon==="USD"?tc:1);
+  c.brechas=[
+    {name:"Si faltaras hoy",        need:c.fallecer,      have:c.saVida,    nota:c.aniosGastos+" años de gasto familiar"},
+    {name:"Invalidez o enfermedad", need:c.invalidez,     have:c.saInv,     nota:c.aniosIngresos+" años de ingreso"},
+    {name:"Retiro",                 need:c.capitalRetiro, have:c.ahorroAcum,nota:money(c.rentaRetiro)+" al año por "+c.etapaRetiro+" años"}
+  ].concat(c.suenos.filter(function(x){ return x.monto>0||x.nombre; }).map(function(x){
+    return {name:x.nombre||"Sueño sin nombre", need:x.monto, have:0,
+            nota:x.anios? "capital objetivo · lo quieres en "+x.anios+" años" : "capital objetivo"};
+  }));
+  c.brechaTotal=c.brechas.reduce(function(a,b){return a+Math.max(0,b.need-b.have);},0);
+  c.presupuesto=presupuestoValor(c);
+  c.plazoAnios=plazoAnios(c);
+  c.dejaTrabajar=Math.max(0,c.etapaProd-c.plazoAnios);
+  return c;
+}
+function presupuestoValor(c){
+  var p=S.traje.presupuesto;
+  if(p==="mes")  return n(S.fin.ingreso);
+  if(p==="p10")  return c.ingresoAnual*0.10;
+  if(p==="p15")  return c.ingresoAnual*0.15;
+  if(p==="p20")  return c.ingresoAnual*0.20;
+  if(p==="otro") return n(S.traje.presupuestoOtro);
+  return 0;
+}
+
+var STEPS=[
+ {t:"Cómo vamos a trabajar",m:3},{t:"Acerca de ti",m:8},{t:"Aspectos financieros",m:6},
+ {t:"Protección actual",m:8},{t:"Línea de la vida",m:12},{t:"Tus brechas",m:8},
+ {t:"Traje a la medida",m:6},{t:"Compromisos y cierre",m:5},{t:"Nuestra misión",m:3},{t:"Resumen de la sesión",m:1}
+];
+var cur=0;
+
+/* ---------- campos ---------- */
+function get(path){ var p=path.split("."),o=S; for(var i=0;i<p.length;i++){ o=o[p[i]]; if(o==null) return ""; } return o; }
+function set(path,val){ var p=path.split("."),o=S; for(var i=0;i<p.length-1;i++){ o=o[p[i]]; } o[p[p.length-1]]=val; }
+function fld(path,label,opt){
+  opt=opt||{}; var v=get(path); var id="f_"+path.replace(/\./g,"_");
+  var attrs='id="'+id+'" data-path="'+path+'"', el;
+  if(opt.type==="textarea") el='<textarea '+attrs+' rows="'+(opt.rows||3)+'">'+esc(v)+'</textarea>';
+  else if(opt.options) el='<select '+attrs+'>'+opt.options.map(function(o){
+      var val=typeof o==="string"?o:o.v, txt=typeof o==="string"?o:o.t;
+      return '<option value="'+esc(val)+'"'+(String(v)===String(val)?" selected":"")+'>'+esc(txt)+'</option>';
+    }).join("")+'</select>';
+  else el='<input '+attrs+(opt.money?' class="money"':"")+' type="'+(opt.type||"text")+'"'+(opt.ph?' placeholder="'+esc(opt.ph)+'"':"")+' value="'+esc(v)+'">';
+  return '<div class="f'+(opt.span2?" span2":"")+'"><label for="'+id+'">'+esc(label)+'</label>'+el+(opt.hint?'<span class="hint">'+esc(opt.hint)+'</span>':"")+'</div>';
+}
+function ro(key,label,hint){
+  return '<div class="f"><label>'+esc(label)+'</label><input class="ro" readonly data-ro="'+key+'" value="'+esc(roVal(key,CALC))+'">'
+   +'<span class="hint" data-rohint="'+key+'">'+esc(hint===undefined?roHint(key,CALC):hint)+'</span></div>';
+}
+var CALC=calc();
+function roVal(k,c){
+  switch(k){
+    case "edad": return c.edadActual? c.edadActual+" años":"—";
+    case "excedente": return money(c.excedente);
+    case "aniosLab": return c.aniosLab? c.aniosLab+" años":"—";
+    case "etapaProd": return c.etapaProd? c.etapaProd+" años más":"—";
+    case "etapaRetiro": return c.etapaRetiro? c.etapaRetiro+" años":"—";
+    case "ingresoAnual": return money(c.ingresoAnual);
+    case "gastoAnual": return money(c.gastoAnual);
+    case "restanGanar": return money(c.restanGanar);
+    case "hasGenerado": return money(c.hasGenerado);
+    case "fallecer": return money(c.fallecer);
+    case "invalidez": return money(c.invalidez);
+    case "rentaRetiro": return money(c.rentaRetiro);
+    case "capitalRetiro": return money(c.capitalRetiro);
+    case "ahorroMinimo": return money(c.ahorroMinimo);
+    case "rentaRetiro2": return money(c.rentaRetiro);
+    case "capitalRetiro2": return money(c.capitalRetiro);
+    case "ahorroMinimo2": return money(c.ahorroMinimo);
+    case "duracion": return "60 minutos";
+  }
+  return "";
+}
+function roHint(k,c){
+  if(k==="excedente") return c.excedente>=0?"excedente mensual":"déficit mensual";
+  if(k==="hasGenerado") return c.mediaIngreso?"media de ingresos "+money(c.mediaIngreso):"";
+  if(k==="capitalRetiro2") return c.etapaRetiro?("para vivir "+c.etapaRetiro+" años de retiro"):"";
+  if(k==="ahorroMinimo2") return c.hasGenerado?(S.lv.pctAhorro+"% de "+money(c.hasGenerado)+" que ya generaste"):"";
+  return "";
+}
+
+/* ---------- pasos ---------- */
+function stepHTML(i,c){
+  switch(i){
+  case 0: return ''
+   +'<div class="eyebrow">Etapa 1 · Encuadre</div>'
+   +'<h2>Gracias por darte este tiempo para ti</h2>'
+   +'<p class="lede">Esta conversación es tuya. No vengo a venderte nada hoy: vengo a entender tu situación y a devolverte un diagnóstico con números claros. Todo lo que me compartas es <strong>totalmente confidencial</strong>.</p>'
+   +'<div class="flow">'
+     +'<div><div class="k">01</div><div class="h">Conocerte</div><div class="p">Quién eres, quién depende de ti y qué te mueve.</div></div>'
+     +'<div><div class="k">02</div><div class="h">Detectar</div><div class="p">Qué tienes hoy y qué te falta, con cifras.</div></div>'
+     +'<div><div class="k">03</div><div class="h">Priorizar</div><div class="p">Qué resolvemos primero y con qué presupuesto.</div></div>'
+     +'<div><div class="k">04</div><div class="h">Resolver</div><div class="p">Segunda cita: arrancamos el plan de acción.</div></div>'
+   +'</div>'
+   +'<div class="card"><h3>Datos de la sesión</h3><div class="grid g3">'
+     +fld("meta.asesor","Asesor")+fld("meta.fecha","Fecha",{type:"date"})+ro("duracion","Duración prevista","")
+   +'</div><div style="margin-top:16px"><label class="chk"><input type="checkbox" data-path="meta.confidencial"'+(S.meta.confidencial?" checked":"")+'><span>Le expliqué al prospecto que la sesión es confidencial y que la información se usa solo para su diagnóstico. Confirmó estar de acuerdo.</span></label></div></div>';
+
+  case 1: return ''
+   +'<div class="eyebrow">Etapa 2 · Conocerte</div><h2>Acerca de ti</h2>'
+   +'<p class="lede">Llena esto conmigo en pantalla. Si algo prefieres no contestar, lo saltamos sin problema.</p>'
+   +'<div class="card"><h3>Datos personales</h3><div class="grid g3">'
+     +fld("p.nombre","Nombre completo",{span2:true})+fld("p.nacimiento","Fecha de nacimiento",{type:"date"})
+     +ro("edad","Edad","")
+     +fld("p.regimen","Régimen fiscal",{options:["","Asalariado","PFAE","PFAE / Asalariado","Persona moral","RESICO","Otro"]})
+     +fld("p.ocupacion","Ocupación")+fld("p.antiguedad","Tiempo en tu negocio o trabajo")
+     +fld("p.civil","Estado civil",{options:["","Soltero(a)","Casado(a)","Unión libre","Divorciado(a)","Viudo(a)"]})
+     +fld("p.hobbies","Hobbies o deportes")
+     +fld("p.salud","Salud (padecimientos, cirugías)",{span2:true})
+     +fld("p.fuma","¿Fumas?",{options:["No","Sí"]})
+     +fld("p.email","Email")+fld("p.tel","Celular")+fld("p.cp","Código postal / zona")
+   +'</div></div>'
+   +'<div class="card"><h3>Dependientes económicos</h3>'
+   +'<p class="note" style="margin:-6px 0 14px">¿Qué personas dependen de tus ingresos o a quién apoyas económicamente con regularidad?</p>'
+   +'<div class="wrapx"><table class="rep"><thead><tr><th style="width:34%">Nombre</th><th style="width:12%">Edad</th><th style="width:24%">Parentesco</th><th style="width:24%">Salud</th><th></th></tr></thead><tbody>'
+   +S.dep.map(function(d,ix){ return '<tr>'
+       +'<td><input data-dep="'+ix+'" data-k="nombre" value="'+esc(d.nombre||"")+'"></td>'
+       +'<td><input data-dep="'+ix+'" data-k="edad" class="money" value="'+esc(d.edad||"")+'"></td>'
+       +'<td><input data-dep="'+ix+'" data-k="parentesco" value="'+esc(d.parentesco||"")+'"></td>'
+       +'<td><input data-dep="'+ix+'" data-k="salud" value="'+esc(d.salud||"")+'"></td>'
+       +'<td><button class="del" type="button" data-deldep="'+ix+'" aria-label="Quitar">×</button></td></tr>'; }).join("")
+   +'</tbody></table></div><div style="margin-top:12px"><button class="mini" type="button" id="addDep">+ Agregar dependiente</button></div></div>';
+
+  case 2: return ''
+   +'<div class="eyebrow">Etapa 2 · Conocerte</div><h2>Aspectos financieros</h2>'
+   +'<p class="lede">Números aproximados están bien. Buscamos la fotografía, no la contabilidad exacta.</p>'
+   +'<div class="card"><h3>Flujo mensual</h3><div class="grid g3">'
+     +fld("fin.ingreso","Ingreso mensual",{money:true,ph:"90,000"})
+     +fld("fin.adicional","Ingresos adicionales",{money:true,ph:"25,000"})
+     +fld("fin.egresos","Egresos mensuales",{money:true,ph:"80,000"})
+     +ro("excedente","Ingreso vs. gastos")
+     +fld("fin.ahorroMes","Ahorro mensual",{money:true})
+     +fld("fin.ahorroAcum","Ahorro acumulado a la fecha",{money:true,hint:"Todo lo que hoy tienes guardado o invertido"})
+   +'</div></div>'
+   +'<div class="card"><h3>Deudas y crédito</h3><div class="grid g2">'
+     +fld("fin.deudas","Deudas (préstamos, tarjetas, auto, hipoteca)",{type:"textarea",rows:3})
+     +fld("fin.tarjetas","¿Manejas tarjeta de crédito o débito?",{options:["","Ninguna","Crédito","Débito","Ambas"]})
+   +'</div></div>';
+
+  case 3: return ''
+   +'<div class="eyebrow">Etapa 3 · Detectar</div><h2>Protección actual</h2>'
+   +'<p class="lede">Vamos a inventariar lo que ya tienes. Lo que esté cubierto lo respetamos; lo que falte lo veremos en la siguiente pantalla.</p>'
+   +'<div class="card"><h3>Vida e invalidez</h3><div class="grid g4">'
+     +fld("prot.vidaSA","Suma asegurada de vida",{money:true})
+     +fld("prot.vidaMon","Moneda",{options:["MXN","USD"]})
+     +fld("prot.tc","Tipo de cambio",{money:true,hint:"Solo si la póliza es en USD"})
+     +fld("prot.vidaPrima","Prima anual",{money:true})
+     +fld("prot.invSA","Suma asegurada por invalidez",{money:true,hint:"Deja en 0 si no tienes cobertura"})
+     +fld("prot.vidaPrest","¿Es prestación laboral?",{options:["No","Sí"]})
+     +fld("prot.vidaInteres","¿Genera valor en efectivo?",{options:["No","Sí"]})
+     +fld("prot.vidaTasa","Tasa anual (%)",{money:true})
+   +'</div></div>'
+   +'<div class="card"><h3>Gastos médicos mayores</h3><div class="grid g4">'
+     +fld("prot.gmmSA","Suma asegurada",{hint:"Escribe IMSS/ISSSTE si es lo único"})
+     +fld("prot.gmmPrima","Prima anual",{money:true})+fld("prot.gmmDed","Deducible",{money:true})
+     +fld("prot.gmmCoa","Coaseguro (%)",{money:true})+fld("prot.gmmPrest","¿Es prestación laboral?",{options:["No","Sí"]})
+   +'</div></div>'
+   +'<div class="card"><h3>Daños</h3><div class="grid g4">'
+     +fld("prot.autoCob","Auto · cobertura",{options:["","Sin seguro","Limitada","Amplia","Amplia plus"]})
+     +fld("prot.autoPrima","Auto · prima anual",{money:true})+fld("prot.autoRenov","Auto · próxima renovación")
+     +fld("prot.autoPrest","Auto · ¿prestación?",{options:["No","Sí"]})
+     +fld("prot.hogCob","Hogar y mascotas · cobertura")+fld("prot.hogDed","Hogar · deducible",{money:true})
+     +fld("prot.hogCoa","Hogar · coaseguro (%)",{money:true})
+   +'</div></div>'
+   +'<div class="card"><h3>Empresa</h3><div class="grid g4">'
+     +fld("prot.empSocios","Seguro de socios")+fld("prot.empClave","Seguro de hombre clave")
+     +fld("prot.empInmueble","Inmueble")+fld("prot.empBienes","Bienes")
+   +'</div></div>';
+
+  case 4: return ''
+   +'<div class="eyebrow">Etapa 3 · Detectar</div><h2>Tu línea de la vida</h2>'
+   +'<p class="lede">Aquí es donde la conversación cambia. Vamos a poner en una sola línea lo que ya ganaste, lo que te falta por ganar y lo que pasaría si algo se interrumpe.</p>'
+   +'<div class="card"><h3>La línea</h3><div class="grid g4">'
+     +fld("lv.edadInicio","¿A qué edad empezaste a trabajar?",{money:true})
+     +fld("lv.edadActual","Edad actual",{money:true,hint:"Se calcula de tu fecha de nacimiento"})
+     +fld("lv.jubilacion","¿A qué edad te gustaría retirarte?",{money:true})
+     +fld("lv.esperanza","Esperanza de vida",{money:true})
+     +fld("lv.primerIngreso","Tu primer ingreso ANUAL",{money:true,hint:"Aproximado, del primer año que trabajaste"})
+     +ro("aniosLab","Años laborando","")+ro("etapaProd","Etapa productiva","")+ro("etapaRetiro","Etapa en el retiro","")
+     +ro("ingresoAnual","Ingreso anual actual","")+ro("gastoAnual","Gasto fijo anual","")
+     +ro("restanGanar","Te resta por ganar al menos","")+ro("hasGenerado","Has generado")
+   +'</div></div>'
+   +'<div class="card"><h3>Protección · las tres interrupciones</h3><div class="grid g3">'
+     +fld("lv.necMensual","Si ya no estuvieras, ¿cuánto necesita tu familia al mes?",{money:true,hint:"Vacío = tus egresos mensuales"})
+     +fld("lv.aniosGastos","Mínimo por cuántos años",{money:true})
+     +ro("fallecer","Capital por fallecimiento","")
+     +fld("lv.aniosIngresos","Si no pudieras trabajar, ¿cuántos años de ingreso necesitas?",{money:true,span2:true})
+     +ro("invalidez","Capital por invalidez o enfermedad","")
+   +'</div></div>'
+   +'<div class="card"><h3>Ahorro · tus sueños</h3>'
+   +'<p class="note" style="margin:-6px 0 16px">¿Qué quieres lograr que hoy no está en el presupuesto? Todo lo que requiera ahorrar por años: la casa, la universidad de los hijos, el viaje, el negocio propio.</p>'
+   +'<div class="wrapx"><table class="rep"><thead><tr><th style="width:44%">Sueño</th><th style="width:26%">Capital que requiere</th><th style="width:26%">¿En cuántos años?</th><th></th></tr></thead><tbody>'
+   +S.suenos.map(function(x,ix){ return '<tr>'
+       +'<td><input data-sue="'+ix+'" data-k="nombre" placeholder="Comprar casa" value="'+esc(x.nombre||"")+'"></td>'
+       +'<td><input data-sue="'+ix+'" data-k="monto" class="money" placeholder="3,000,000" value="'+esc(x.monto||"")+'"></td>'
+       +'<td><input data-sue="'+ix+'" data-k="anios" class="money" placeholder="10" value="'+esc(x.anios||"")+'"></td>'
+       +'<td><button class="del" type="button" data-delsue="'+ix+'" aria-label="Quitar">×</button></td></tr>'; }).join("")
+   +'</tbody></table></div>'
+   +'<div style="margin-top:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+     +'<button class="mini" type="button" id="addSue">+ Agregar sueño</button>'
+     +'<span class="note" data-live="suenosTotal">'+(c.suenosTotal?'Suman <strong style="font-family:var(--f-num);color:var(--ink)">'+money(c.suenosTotal)+'</strong> de capital por construir.':'')+'</span>'
+   +'</div></div>'
+
+   +'<div class="card destacada"><h3>Ahorro para el retiro</h3>'
+   +'<p class="sub">El único gasto que sabemos con certeza que va a llegar, y el único que nadie va a financiar por ti. Todo lo demás se puede posponer; esto no.</p>'
+   +'<div class="grid g2">'
+     +fld("lv.pctRetiro","% de tu ingreso que quieres conservar en el retiro",{money:true,hint:"Lo habitual es entre 70% y 80%"})
+     +fld("lv.pctAhorro","Ahorro mínimo esperado (% de lo que has ganado)",{money:true,hint:"La referencia sana es 10%"})
+   +'</div>'
+   +'<div class="destaca">'
+     +'<div class="b fuerte"><div class="k">Renta anual en el retiro</div><div class="v" data-ro="rentaRetiro2">'+money(c.rentaRetiro)+'</div><div class="n">lo que necesitas cada año a partir de los '+(c.jubilacion||"—")+'</div></div>'
+     +'<div class="b fuerte"><div class="k">Capital necesario para el retiro</div><div class="v" data-ro="capitalRetiro2">'+money(c.capitalRetiro)+'</div><div class="n" data-rohint="capitalRetiro2">'+esc(roHint("capitalRetiro2",c))+'</div></div>'
+     +'<div class="b"><div class="k">Deberías tener ahorrado al menos</div><div class="v" data-ro="ahorroMinimo2">'+money(c.ahorroMinimo)+'</div><div class="n" data-rohint="ahorroMinimo2">'+esc(roHint("ahorroMinimo2",c))+'</div></div>'
+   +'</div></div>';
+
+  case 5:
+   var pctAh=c.ahorroMinimo?Math.min(100,c.ahorroAcum/c.ahorroMinimo*100):0;
+   return ''
+   +'<div class="eyebrow">Etapa 3 · Detectar</div><h2>Esto es lo que hoy no está resuelto</h2>'
+   +'<p class="lede">Cada barra compara lo que necesitas con lo que ya tienes. La parte naranja es la que hoy pagaría tu familia, tu patrimonio o tú.</p>'
+   +'<div class="sum-hero">'
+     +'<div><div class="k">Brecha total</div><div class="v gap">'+money(c.brechaTotal)+'</div></div>'
+     +'<div><div class="k">Deberías tener ahorrado</div><div class="v acc">'+money(c.ahorroMinimo)+'</div></div>'
+     +'<div><div class="k">Tienes ahorrado</div><div class="v">'+money(c.ahorroAcum)+'</div></div>'
+   +'</div>'
+   +'<div class="card"><h3>Brechas por frente</h3>'+leyenda()
+     +c.brechas.map(meter).join('<div style="height:16px"></div>')+'</div>'
+   +'<div class="card"><h3>Disciplina de ahorro</h3>'
+     +meter({name:"Ahorro acumulado vs. esperado",need:c.ahorroMinimo,have:c.ahorroAcum,nota:S.lv.pctAhorro+"% de "+money(c.hasGenerado)+" generados"})
+     +'<p class="note" style="margin-top:14px">'+(pctAh>=100?"Vas por encima del mínimo esperado. El foco entonces es proteger lo construido y ordenar el destino de ese capital.":"De cada peso que has ganado en "+(c.aniosLab||0)+" años, hoy conservas "+(c.hasGenerado?(c.ahorroAcum/c.hasGenerado*100).toFixed(1):"0")+"%.")+'</p></div>';
+
+  case 6: return ''
+   +'<div class="eyebrow">Etapa 4 · Priorizar</div><h2>Si pudieras diseñar un traje a tu medida…</h2>'
+   +'<p class="lede">No todo se resuelve el mismo día. Marca lo que quieres atender, en el orden en que lo quieres atender: el primero que toques es la prioridad 1.</p>'
+   +'<div class="card"><h3>¿Qué resolvemos, y en qué orden?</h3>'
+     +'<div class="prios">'+PRIORIDADES.map(function(o){
+        var ix=S.traje.prioridades.indexOf(o.id);
+        return '<button type="button" class="prio'+(ix>=0?" on":"")+'" data-prio="'+o.id+'" aria-pressed="'+(ix>=0)+'">'
+          +'<span class="ic">'+o.ic+'</span><span>'+esc(o.t)+'</span>'
+          +'<span class="rank'+(ix<0?" off":"")+'">'+(ix>=0?ix+1:"")+'</span></button>';
+      }).join("")+'</div>'
+     +(S.traje.prioridades.length?'<div class="priolist">'+S.traje.prioridades.map(function(id,ix){var o=prioT(id);return '<span class="pill"><b>'+(ix+1)+'</b>'+o.ic+" "+esc(o.t)+'</span>';}).join("")+'</div>'
+       :'<p class="note" style="margin-top:16px">Toca una o varias tarjetas. El orden en que las tocas define la prioridad.</p>')
+   +'</div>'
+   +'<div class="card"><h3>Condiciones del plan</h3><div class="grid g3">'
+     +fld("traje.plazo","Plazo · ¿cuántos años te gustaría estar aportando?",{options:[{v:"",t:"Elige un plazo…"}].concat(PLAZOS),span2:true})
+     +fld("traje.plazoOtro","Si elegiste “Otro”, especifica")
+     +fld("traje.moneda","Moneda",{options:["MXN","USD","UDI"]})
+     +fld("traje.deducible","¿Deducible de impuestos?",{options:["No","Sí"]})
+     +'<div class="f"><label>Plazo elegido</label><input class="ro" readonly data-live="plazo" value="'+esc(plazoTexto(c))+'"><span class="hint" data-live="plazoHint">'+esc(c.plazoAnios&&c.dejaTrabajar?"aportas "+c.plazoAnios+" años y dejas trabajar el dinero "+c.dejaTrabajar+" años más":"")+'</span></div>'
+   +'</div></div>'
+   +'<div class="card"><h3>Cada año podrías aportar</h3><div class="grid g2">'
+     +presuOpt("mes","Un mes de tu ingreso",n(S.fin.ingreso))
+     +presuOpt("p10","El 10% de tu ingreso anual",c.ingresoAnual*0.10)
+     +presuOpt("p15","El 15% de tu ingreso anual",c.ingresoAnual*0.15)
+     +presuOpt("p20","El 20% de tu ingreso anual",c.ingresoAnual*0.20)
+   +'</div><div class="grid g2" style="margin-top:14px">'
+     +presuOpt("otro","Otra cantidad superior",n(S.traje.presupuestoOtro))
+     +fld("traje.presupuestoOtro","Cantidad",{money:true})
+   +'</div><p class="note" style="margin-top:16px" data-live="presu">'+presuNota(c)+'</p></div>';
+
+  case 7: return ''
+   +'<div class="eyebrow">Etapa 4 · Priorizar</div><h2>Mi compromiso contigo</h2>'
+   +'<p class="lede">Cerramos con lo que yo me llevo de tarea y con la fecha en la que nos volvemos a ver.</p>'
+   +'<div class="card"><h3>Compromisos</h3>'+fld("cierre.compromisos","",{type:"textarea",rows:4})+'</div>'
+   +'<div class="card"><h3>Nuestra próxima reunión</h3><div class="grid g3">'
+     +fld("cierre.fecha","Día",{type:"date"})+fld("cierre.hora","Hora",{type:"time"})
+     +fld("cierre.acompania","¿Alguien más que deba estar presente?")+'</div></div>'
+   +'<div class="card"><h3>Retroalimentación</h3><div class="grid g2">'
+     +fld("cierre.llevas","¿Qué te llevas de esta reunión?",{type:"textarea",rows:3})
+     +fld("cierre.valor","¿La información que vimos te fue de valor?",{type:"textarea",rows:3})+'</div></div>';
+
+  case 8: return ''
+   +'<div class="eyebrow">Etapa 4 · Priorizar</div><h2>Gracias por ayudarme a llegar a más familias</h2>'
+   +'<p class="lede">¿A quién de las personas que más quieres le serviría esta misma información para sus metas y objetivos?</p>'
+   +'<div class="card"><h3>Referidos</h3><div class="wrapx"><table class="rep"><thead><tr><th style="width:16%">Relación</th><th style="width:26%">Nombre</th><th style="width:22%">Celular</th><th style="width:36%">¿Qué debo saber de esa persona?</th></tr></thead><tbody>'
+   +["Amigo 1","Amigo 2","Familiar 1","Familiar 2","Colega o socio 1","Colega o socio 2"].map(function(lbl,ix){
+       var r=S.ref[ix]||{};
+       return '<tr><td style="padding-top:10px;color:var(--ink-3);font-size:13px">'+lbl+'</td>'
+       +'<td><input data-ref="'+ix+'" data-k="nombre" value="'+esc(r.nombre||"")+'"></td>'
+       +'<td><input data-ref="'+ix+'" data-k="cel" value="'+esc(r.cel||"")+'"></td>'
+       +'<td><input data-ref="'+ix+'" data-k="nota" value="'+esc(r.nota||"")+'"></td></tr>';
+     }).join("")+'</tbody></table></div></div>';
+
+  case 9:
+   var dep=S.dep.filter(function(d){return d.nombre;});
+   var refs=S.ref.filter(function(r){return r&&r.nombre;});
+   return ''
+   +'<div class="eyebrow">Cierre</div><h2>Resumen de la sesión</h2>'
+   +'<p class="lede">Comparte esta pantalla al final de la llamada y envíala en PDF el mismo día. Es lo que el prospecto recordará mañana.</p>'
+   +'<div class="sum-hero">'
+     +'<div><div class="k">Brecha total detectada</div><div class="v gap">'+money(c.brechaTotal)+'</div></div>'
+     +'<div><div class="k">Presupuesto anual acordado</div><div class="v acc">'+money(c.presupuesto)+'</div></div>'
+     +'<div><div class="k">Próxima reunión</div><div class="v" style="font-size:17px;font-family:var(--f-body);letter-spacing:0">'+(S.cierre.fecha?esc(fecha(S.cierre.fecha))+(S.cierre.hora?" · "+esc(S.cierre.hora)+" h":""):"por definir")+'</div></div>'
+   +'</div>'
+   +reloj(c)
+   +'<div class="card"><h3>Tus prioridades, en tus palabras</h3>'
+     +(S.traje.prioridades.length
+        ?'<div class="priolist" style="margin-top:0">'+S.traje.prioridades.map(function(id,ix){var o=prioT(id);return '<span class="pill"><b>'+(ix+1)+'</b>'+o.ic+" "+esc(o.t)+'</span>';}).join("")+'</div>'
+        :'<p class="note">Sin prioridades marcadas.</p>')
+     +'<dl class="kv" style="margin-top:18px">'
+       +'<dt>Presupuesto</dt><dd>'+money(c.presupuesto)+' al año'+(c.presupuesto?' · '+money(c.presupuesto/12)+' al mes':'')+'</dd>'
+       +'<dt>Plazo de aportación</dt><dd>'+esc(plazoTexto(c))+'</dd>'
+       +'<dt>Moneda</dt><dd>'+esc(S.traje.moneda||"—")+(S.traje.deducible==="Sí"?" · deducible de impuestos":"")+'</dd>'
+     +'</dl></div>'
+   +'<div class="card"><h3>'+esc(S.p.nombre||"Prospecto")+'</h3><dl class="kv">'
+     +'<dt>Edad</dt><dd>'+(c.edadActual||"—")+'</dd>'
+     +'<dt>Ocupación</dt><dd>'+esc(S.p.ocupacion||"—")+'</dd>'
+     +'<dt>Dependientes</dt><dd>'+(dep.length?dep.map(function(d){return esc(d.nombre)+" ("+esc(d.parentesco||"")+(d.edad?", "+esc(d.edad):"")+")";}).join(" · "):"—")+'</dd>'
+     +'<dt>Ingreso anual</dt><dd>'+money(c.ingresoAnual)+'</dd>'
+     +'<dt>Excedente mensual</dt><dd>'+money(c.excedente)+'</dd>'
+     +'<dt>Etapa productiva</dt><dd>'+c.etapaProd+' años · te resta por ganar '+money(c.restanGanar)+'</dd>'
+     +'<dt>Sueños</dt><dd>'+(c.suenos.filter(function(x){return x.nombre||x.monto;}).length
+        ? c.suenos.filter(function(x){return x.nombre||x.monto;}).map(function(x){ return esc(x.nombre||"Sin nombre")+" — "+money(x.monto)+(x.anios?" en "+x.anios+" años":""); }).join(" · ")
+        : "—")+'</dd>'
+   +'</dl></div>'
+   +'<div class="card"><h3>Brechas</h3>'+leyenda()+c.brechas.map(meter).join('<div style="height:16px"></div>')+'</div>'
+   +((waLink(SES.whats)||agendaLink(SES.agenda))?'<div class="card"><h3>Cómo localizarme</h3><div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +(waLink(SES.whats)?'<a class="btn" style="text-decoration:none" href="'+esc(waLink(SES.whats))+'" target="_blank" rel="noopener">WhatsApp '+esc(waTexto(SES.whats))+'</a>':'')
+      +(agendaLink(SES.agenda)?'<a class="btn ghost" style="text-decoration:none" href="'+esc(agendaLink(SES.agenda))+'" target="_blank" rel="noopener">Agendar una cita</a>':'')
+      +'</div><p class="note" style="margin:14px 0 0">Estos botones también aparecen al pie del PDF que le envías.</p></div>':'')
+   +'<div class="card"><h3>Compromisos</h3><p style="white-space:pre-line;margin:0;color:var(--ink-2)">'+esc(S.cierre.compromisos||"—")+'</p>'
+     +(S.cierre.llevas?'<p style="margin:14px 0 0;color:var(--ink-2)"><strong>Se lleva:</strong> '+esc(S.cierre.llevas)+'</p>':'')+'</div>'
+   +(refs.length?'<div class="card"><h3>Referidos</h3><dl class="kv">'+refs.map(function(r){return '<dt>'+esc(r.nombre)+'</dt><dd>'+esc(r.cel||"")+(r.nota?" — "+esc(r.nota):"")+'</dd>';}).join("")+'</dl></div>':'');
+  }
+  return "";
+}
+
+function leyenda(){ return '<div class="legend" style="margin-bottom:16px"><span><i style="background:var(--data)"></i>Ya cubierto</span><span><i style="background:var(--gap)"></i>Brecha</span></div>'; }
+function presuNota(c){
+  return 'Presupuesto elegido: <strong style="font-family:var(--f-num);color:var(--gold)">'+money(c.presupuesto)+'</strong> al año'+(c.presupuesto?' · '+money(c.presupuesto/12)+' al mes':'');
+}
+function presuOpt(v,label,amount){
+  var on=S.traje.presupuesto===v;
+  return '<label class="chk" style="border:1px solid '+(on?"var(--accent)":"var(--line)")+';border-radius:10px;padding:13px 15px;cursor:pointer;background:'+(on?"rgba(249,115,22,.12)":"transparent")+'">'
+   +'<input type="radio" name="presu" value="'+v+'" data-presu'+(on?" checked":"")+'>'
+   +'<span><span style="display:block;color:var(--ink);font-weight:500">'+esc(label)+'</span>'
+   +'<span style="font-family:var(--f-num);font-size:18px;color:var(--gold);display:block;margin-top:3px" data-presuamt="'+v+'">'+money(amount)+'</span></span></label>';
+}
+function meter(b){
+  var need=Math.max(0,b.need||0),have=Math.max(0,b.have||0);
+  var cov=need?Math.min(have,need):0,gapv=Math.max(0,need-have);
+  var pct=need?Math.round(cov/need*100):0;
+  var fw=need?cov/need*100:0,rw=need?gapv/need*100:0;
+  return '<div class="meter"><div class="top"><span class="name">'+esc(b.name)+'</span><span class="pct">'+(need?pct+"% cubierto":"sin dato")+'</span></div>'
+   +'<div class="track">'+(fw>0?'<span class="fill" style="width:'+fw.toFixed(1)+'%"></span>':'')+(rw>0?'<span class="rest" style="width:'+rw.toFixed(1)+'%"></span>':'')+'</div>'
+   +'<div class="row"><span>Necesitas <b>'+money(need)+'</b></span><span>Tienes <b>'+money(have)+'</b></span>'
+   +(need<=0?'<span style="color:var(--ink-3)">sin captura</span>':(gapv>0?'<span class="g">Falta '+money(gapv)+'</span>':'<span style="color:var(--ok);font-weight:600">Cubierto</span>'))+'</div>'
+   +(b.nota?'<div class="note">'+esc(b.nota)+'</div>':'')+'</div>';
+}
+
+/* ---------- reloj del patrimonio ---------- */
+function reloj(c){
+  var e=c.edadActual;
+  var idx=-1; for(var i=0;i<ETAPAS.length;i++){ if(e>=ETAPAS[i].min&&e<=ETAPAS[i].max) idx=i; }
+  var lo=20,hi=Math.max(85,c.esperanza||85);
+  var pos=e?Math.min(100,Math.max(0,(e-lo)/(hi-lo)*100)):0;
+  var plazo=c.plazoAnios, deja=c.dejaTrabajar;
+  var hackP2;
+  if(plazo && deja>0) hackP2='En tu caso: eliges aportar <strong>'+plazo+' años</strong> y dejas que ese dinero siga trabajando <strong>'+deja+' años más</strong> hasta tu retiro a los '+(c.jubilacion||"—")+'.';
+  else if(plazo)      hackP2='En tu caso aportarías <strong>'+plazo+' años</strong>, prácticamente toda tu etapa productiva. Un plazo más corto dejaría que el dinero trabaje solo antes de tu retiro.';
+  else                hackP2='Lo que define el resultado no es cuánto tiempo pagas, sino cuánto tiempo dejas trabajar tu dinero.';
+  return '<div class="reloj">'
+   +'<div class="rh"><h3>⏳ El reloj del patrimonio</h3><p>Tu camino de la trascendencia financiera</p></div>'
+   +'<div class="etapas">'+ETAPAS.map(function(t,i){
+      return '<div class="etapa'+(i===idx?" here":"")+'">'+(i===idx?'<span class="aqui">ESTÁS AQUÍ</span>':"")
+       +'<div class="dec">'+t.dec+'</div><div class="ic">'+t.ic+'</div><div class="nm">'+esc(t.nm)+'</div>'
+       +'<div class="li">'+t.li.map(esc).join("<br>")+'</div></div>';
+    }).join("")+'</div>'
+   +'<div class="eje"><div class="barra">'+(e?'<span class="dot" style="left:'+pos.toFixed(1)+'%"></span>':"")+'</div>'
+   +'<div class="ticks"><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>'+hi+'</span></div></div>'
+   +'<div class="hack"><h4>⏱️ El hack que funciona a cualquier edad</h4>'
+   +'<p>No tienes que aportar toda la vida: eliges un <strong>plazo limitado</strong> y a partir de ahí <strong>el interés compuesto hace la magia</strong> por sí solo.</p>'
+   +'<p>'+hackP2+'</p></div></div>';
+}
+
+
+/* ---------- PDF de una página ---------- */
+function opMeter(b){
+  var need=Math.max(0,b.need||0), have=Math.max(0,b.have||0);
+  var cov=need?Math.min(have,need):0, falta=Math.max(0,need-have);
+  var fw=need?cov/need*100:0, gw=need?falta/need*100:0;
+  return '<div class="m"><div class="top">'+esc(b.name)+'<i>'+(need?Math.round(fw)+"% cubierto":"sin dato")+'</i></div>'
+   +'<div class="bar">'+(fw>0?'<u class="f" style="width:'+fw.toFixed(1)+'%"></u>':'')+(gw>0?'<u class="g" style="width:'+gw.toFixed(1)+'%"></u>':'')+'</div>'
+   +'<div class="r"><span>Necesita '+money(need)+'</span><span>Tiene '+money(have)+'</span>'
+   +(need<=0?'':(falta>0?'<em>Falta '+money(falta)+'</em>':'<span style="color:#127A50;font-weight:600">Cubierto</span>'))+'</div></div>';
+}
+function onePage(c){
+  var e=c.edadActual;
+  var idx=-1; for(var i=0;i<ETAPAS.length;i++){ if(e>=ETAPAS[i].min&&e<=ETAPAS[i].max) idx=i; }
+  var lo=20, hi=Math.max(85,c.esperanza||85);
+  var pos=e?Math.min(100,Math.max(0,(e-lo)/(hi-lo)*100)):0;
+  var suenos=c.suenos.filter(function(x){ return x.nombre||x.monto; });
+  var prot=c.brechas.slice(0,3);
+  var hoy=new Date();
+
+  var hack;
+  if(c.plazoAnios && c.dejaTrabajar>0) hack='En tu caso: aportas <b>'+c.plazoAnios+' años</b> y dejas que ese dinero siga trabajando <b>'+c.dejaTrabajar+' años más</b> hasta tu retiro a los '+(c.jubilacion||"—")+'.';
+  else if(c.plazoAnios)                hack='En tu caso aportarías <b>'+c.plazoAnios+' años</b>, prácticamente toda tu etapa productiva. Un plazo más corto dejaría que el interés compuesto trabaje solo antes de tu retiro.';
+  else                                 hack='Lo que define el resultado no es cuánto tiempo pagas, sino cuánto tiempo dejas trabajar tu dinero.';
+
+  return ''
+  +'<div class="op-h"><div><div class="t">Asesoría Integral</div><div class="s">GAR · Grupo Asesores RAM</div></div>'
+    +'<div class="who"><b>'+esc(S.p.nombre||"Prospecto")+'</b>'
+    +(c.edadActual? c.edadActual+" años · ":"")+esc(S.p.ocupacion||"")+'<br>'
+    +esc(fecha(S.meta.fecha)||fecha(hoy.toISOString().slice(0,10)))+(S.meta.asesor?" · asesor "+esc(S.meta.asesor):"")+'</div></div>'
+
+  +'<div class="op-reloj"><div class="rt"><b>⏳ El reloj del patrimonio</b><span>Tu camino de la trascendencia financiera</span></div>'
+    +'<div class="decs">'+ETAPAS.map(function(t,k){
+        return '<div class="dec'+(k===idx?" here":"")+'">'+(k===idx?'<div class="aqui">ESTÁS AQUÍ</div>':'')
+          +'<div class="d">'+t.dec+'</div><div class="ic">'+t.ic+'</div>'
+          +'<div class="n">'+esc(t.nm)+'</div><div class="li">'+t.li.map(esc).join("<br>")+'</div></div>';
+      }).join("")+'</div>'
+    +'<div class="eje2"><div class="b">'+(e?'<span class="p" style="left:'+pos.toFixed(1)+'%"></span>':'')+'</div>'
+      +'<div class="tk"><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>'+hi+'</span></div></div>'
+    +'<div class="op-hack"><div class="ht">⏱️ El hack que funciona a cualquier edad</div>'
+      +'<p>No tienes que aportar toda la vida: eliges un <b>plazo limitado</b> y a partir de ahí el interés compuesto hace la magia por sí solo.</p>'
+      +'<p>'+hack+'</p></div></div>'
+
+  +'<div class="cols">'
+    +'<div class="bx"><h4>Situación financiera</h4><dl class="kv">'
+      +'<dt>Ingreso anual</dt><dd>'+money(c.ingresoAnual)+'</dd>'
+      +'<dt>Gasto fijo anual</dt><dd>'+money(c.gastoAnual)+'</dd>'
+      +'<dt>Excedente mensual</dt><dd class="'+(c.excedente<0?"neg":"pos")+'">'+money(c.excedente)+'</dd>'
+      +'<dt>Ahorro acumulado</dt><dd>'+money(c.ahorroAcum)+'</dd>'
+      +'<dt>Has generado en '+(c.aniosLab||0)+' años</dt><dd>'+money(c.hasGenerado)+'</dd>'
+      +'<dt>Deberías tener ahorrado</dt><dd>'+money(c.ahorroMinimo)+'</dd>'
+      +'<dt>Te resta por ganar</dt><dd>'+money(c.restanGanar)+'</dd>'
+      +'<dt>Etapa productiva / retiro</dt><dd>'+c.etapaProd+' / '+c.etapaRetiro+' años</dd>'
+    +'</dl></div>'
+    +'<div class="bx"><h4>Protección y retiro</h4>'
+      +'<div class="lg"><i style="background:var(--op-data)"></i>Ya cubierto &nbsp; <i style="background:var(--op-gap)"></i>Brecha</div>'
+      +prot.map(opMeter).join("")+'</div>'
+  +'</div>'
+
+  +'<div class="bx" style="margin-top:6px"><h4>Proyectos de ahorro</h4>'
+    +(suenos.length
+      ? '<table class="sn"><thead><tr><th>Sueño</th><th class="n">Capital que requiere</th><th class="n">Plazo</th><th class="n">Aporte anual estimado</th></tr></thead><tbody>'
+        +suenos.map(function(x){
+          var ap=x.anios? x.monto/x.anios : 0;
+          return '<tr><td>'+esc(x.nombre||"Sin nombre")+'</td><td class="n">'+money(x.monto)+'</td>'
+            +'<td class="n">'+(x.anios? x.anios+" años":"—")+'</td><td class="n">'+(ap?money(ap):"—")+'</td></tr>';
+        }).join("")+'</tbody></table>'
+        +'<div class="tot"><span>Capital total por construir</span><span>'+money(c.suenosTotal)+'</span></div>'
+      : '<p style="margin:0;font-size:8pt;color:var(--op-ink3)">No se registraron proyectos de ahorro en esta sesión.</p>')
+  +'</div>'
+
+  +'<div class="op-fin"><h4>Lo que acordamos</h4><div class="g3">'
+    +'<div><div class="k">Prioridades, en tu orden</div>'
+      +(S.traje.prioridades.length
+        ? '<div class="prios2">'+S.traje.prioridades.map(function(id,k){ var o=prioT(id); return '<span><b>'+(k+1)+'</b> '+esc(o.t)+'</span>'; }).join("")+'</div>'
+        : '<div class="v sm">Por definir</div>')+'</div>'
+    +'<div><div class="k">Presupuesto anual</div><div class="v">'+money(c.presupuesto)+'</div>'
+      +'<div class="n">'+(c.presupuesto? money(c.presupuesto/12)+" al mes":"por definir")+'</div></div>'
+    +'<div><div class="k">Plazo de aportación</div><div class="v sm">'+esc(plazoTexto(c))+'</div>'
+      +'<div class="n">'+(S.cierre.fecha? "Próxima reunión: "+esc(fecha(S.cierre.fecha))+(S.cierre.hora?" · "+esc(S.cierre.hora)+" h":"") : "Próxima reunión por agendar")+'</div></div>'
+  +'</div>'+contactoHTML()+'</div>'
+
+  +'<div class="op-pie"><span>Documento confidencial · elaborado para '+esc(S.p.nombre||"el prospecto")+'</span>'
+    +'<span>Brecha total detectada: '+money(c.brechaTotal)+'</span></div>';
+}
+
+/* Escala el PDF para que llene la hoja sin pasarse de una página. */
+function ajustarOnePage(){
+  var el=document.getElementById("onepage"); if(!el) return;
+  el.style.zoom="1";
+  var alto=el.scrollHeight;
+  if(!alto) return;
+  var disponible=248*(96/25.4);                 // margen de seguridad: Chrome añade encabezado y pie al imprimir
+  var z=disponible/alto;
+  z=Math.max(.58,Math.min(1.08,z));
+  el.style.zoom=String(Math.round(z*1000)/1000);
+}
+
+function contactoHTML(){
+  var wa=waLink(SES.whats), ag=agendaLink(SES.agenda);
+  var nombre=S.meta.asesor||SES.asesor||"";
+  if(!wa&&!ag&&!nombre) return "";
+  var ligas="";
+  if(wa) ligas+='<a class="solido" href="'+esc(wa)+'">WhatsApp '+esc(waTexto(SES.whats))+'</a>';
+  if(ag) ligas+='<a href="'+esc(ag)+'">Agenda tu próxima cita</a>';
+  return '<div class="contacto"><div class="yo">Tu asesor<b>'+esc(nombre)+'</b></div>'
+    +(ligas?'<div class="ligas">'+ligas+'</div>':'')+'</div>';
+}
+
+/* ---------- guion ---------- */
+var GUION=[
+ {h:"Encuadre (3 min)",say:"Gracias por darte este tiempo. Antes de empezar quiero dejar claro cómo trabajo: hoy no te voy a vender nada. Vamos a conocernos, a detectar qué está resuelto y qué no, y en una segunda cita te presento una solución. Todo lo que me digas es confidencial.",tips:["Pide que apague notificaciones y que estén los dos que deciden.","Confirma que ve tu pantalla completa antes de avanzar.","Marca la casilla de confidencialidad frente a él: se ve serio."]},
+ {h:"Conocerte (8 min)",say:"Cuéntame de ti. ¿A qué te dedicas y desde cuándo? ¿Quién depende de tus ingresos hoy?",tips:["Escribe mientras habla; que vea que lo estás anotando.","Los dependientes son el ancla emocional de toda la sesión: pregunta nombres y edades.","Si duda en salud, dile que sirve para cotizar bien, no para juzgar."]},
+ {h:"Aspectos financieros (6 min)",say:"Números redondos: ¿cuánto entra al mes, cuánto sale y cuánto se queda?",tips:["El campo 'ingreso vs. gastos' se calcula solo: léelo en voz alta.","'Ahorro acumulado' es la cifra clave para la brecha de retiro. No la saltes.","Si se incomoda, recuérdale que aproximado es suficiente."]},
+ {h:"Protección actual (8 min)",say:"Vamos a inventariar lo que ya tienes, para no venderte lo que ya está resuelto.",tips:["Si solo tiene IMSS, escríbelo en GMM: aparecerá tal cual en el resumen.","Pregunta si el seguro es prestación de la empresa: eso desaparece si cambia de trabajo.","Si la póliza está en dólares, cambia la moneda y ajusta el tipo de cambio."]},
+ {h:"Línea de la vida (12 min)",say:"Ahora pongamos tu vida en una línea. ¿A qué edad empezaste a trabajar? ¿Cuánto ganabas ese primer año?",tips:["Ésta es la etapa que no se apura. Es donde ocurre la asesoría.","Al ver 'has generado', haz la pausa: ¿dónde está ese dinero hoy?","Deja que él elija los años de cobertura: el número que sale es suyo, no tuyo."]},
+ {h:"Brechas (8 min)",say:"Esto es lo que hoy no está resuelto. La parte naranja de cada barra es lo que pagaría tu familia si algo pasa mañana.",tips:["No hables encima de la pantalla los primeros cinco segundos: deja que la lea.","Pregunta cuál de las barras le preocupa más. Esa es la prioridad 1.","No propongas producto todavía."]},
+ {h:"Traje a la medida (6 min)",say:"Si pudiéramos empezar por una sola cosa, ¿cuál sería? Márcalas en el orden en que las quieres atender.",tips:["Deja que él ordene las prioridades: tú solo tocas las tarjetas que te dicte.","Auto, hogar, mascota y empresa también son puerta de entrada: no las escondas.","En plazo, recuérdale que aportar 10 o 15 años basta; el interés hace el resto."]},
+ {h:"Cierre (5 min)",say:"Mi compromiso es presentarte una solución a la medida y ser tu agente cuando lo necesites. ¿Qué día nos vemos para revisarla?",tips:["Agenda fecha y hora en la llamada, no después.","Pregunta quién más debe estar: si decide en pareja, sin ella no hay cierre.","Las dos preguntas de retroalimentación abren la puerta a los referidos."]},
+ {h:"Referidos (3 min)",say:"Yo vivo de que las familias me presenten a otras familias. ¿A quién de las personas que más quieres le serviría esto?",tips:["Pídelo justo después de que dijo que la información le fue de valor.","Seis espacios, no uno: el formato pide más de lo que pedirías tú.","Pregunta qué debe saber de cada persona: eso hace la llamada siguiente."]},
+ {h:"Resumen (1 min)",say:"Te comparto el reloj del patrimonio, tus prioridades y el presupuesto que acordamos. Te lo mando en PDF hoy mismo.",tips:["Muestra el reloj: ubica su etapa y cierra con el hack del plazo limitado.","Lee sus prioridades en voz alta, en su orden: es su compromiso, no el tuyo.","Descarga los datos: en la segunda cita cargas el archivo y sigues donde quedaste."]}
+];
+
+/* ---------- render ---------- */
+function render(){
+  CALC=calc(); var c=CALC;
+  document.getElementById("stage").innerHTML='<div class="stage">'+stepHTML(cur,c)+'</div>';
+  renderSteps(); renderDiag(c); renderGuion(); renderWho(c);
+  document.getElementById("onepage").innerHTML=onePage(c);
+  ajustarOnePage();
+  document.getElementById("prev").disabled=(cur===0);
+  document.getElementById("next").textContent=(cur===STEPS.length-1)?"Imprimir resumen":"Siguiente";
+  document.getElementById("stepTime").textContent="Tiempo sugerido: "+STEPS[cur].m+" min";
+  save();
+  if(typeof report==="function") report(cur===STEPS.length-1);
+}
+function renderWho(c){
+  document.getElementById("whoName").textContent=S.p.nombre||"Sin prospecto";
+  var asesor=S.meta.asesor||(typeof SES!=="undefined"?SES.asesor:"");
+  document.getElementById("whoMeta").textContent=(c.edadActual?" · "+c.edadActual+" años":"")+(asesor?" · asesor "+asesor:"");
+}
+function renderSteps(){
+  document.getElementById("steps").innerHTML=STEPS.map(function(s,i){
+    return '<li'+(i===cur?' aria-current="true"':'')+'><button type="button" data-step="'+i+'">'
+     +'<span class="n">'+String(i+1).padStart(2,"0")+'</span><span><span class="t">'+esc(s.t)+'</span> <span class="m">'+s.m+"′</span></span></button></li>";
+  }).join("");
+}
+function renderDiag(c){
+  var kpi=function(k,v,cls){ return '<div class="kpi '+(cls||"")+'"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; };
+  document.getElementById("diag").innerHTML=
+   '<div class="kpis">'+kpi("Ingreso anual",money(c.ingresoAnual))
+    +kpi("Excedente / mes",money(c.excedente),c.excedente<0?"neg":(c.excedente>0?"pos":""))
+    +kpi("Etapa productiva",(c.etapaProd||0)+" años")+kpi("Etapa en retiro",(c.etapaRetiro||0)+" años")
+    +kpi("Has generado",money(c.hasGenerado))+kpi("Te resta por ganar",money(c.restanGanar))+'</div>'
+   +'<div>'+leyenda().replace("Ya cubierto","Cubierto")
+     +(c.brechas.some(function(b){return b.need>0;})?c.brechas.map(meter).join('<div style="height:14px"></div>')
+       :'<p class="empty">Captura ingresos, egresos y edades para ver las brechas.</p>')+'</div>'
+   +'<div class="kpis">'+kpi("Brecha total",money(c.brechaTotal),"neg")+kpi("Presupuesto anual",money(c.presupuesto))+'</div>'
+   +'<p class="note">Las cifras se recalculan mientras capturas. Nada sale de esta computadora: se guardan en el navegador.</p>';
+}
+function renderGuion(){
+  var g=GUION[cur]||{h:"",say:"",tips:[]};
+  document.getElementById("guionBody").innerHTML='<div class="warn">Solo para ti. Cierra este panel antes de compartir pantalla.</div>'
+   +'<h4>'+esc(g.h)+'</h4><p class="say">"'+esc(g.say)+'"</p><h4>Recordatorios</h4><ul>'
+   +g.tips.map(function(t){return "<li>"+esc(t)+"</li>";}).join("")+'</ul>';
+}
+
+/* actualiza solo valores calculados, sin re-render (conserva el cursor) */
+function live(){
+  CALC=calc(); var c=CALC;
+  document.querySelectorAll("[data-ro]").forEach(function(el){ var v=roVal(el.dataset.ro,c); if("value" in el && el.tagName==="INPUT") el.value=v; else el.textContent=v; });
+  document.querySelectorAll("[data-rohint]").forEach(function(el){ el.textContent=roHint(el.dataset.rohint,c); });
+  var pl=document.querySelector('[data-live="plazo"]'); if(pl) pl.value=plazoTexto(c);
+  var plh=document.querySelector('[data-live="plazoHint"]'); if(plh) plh.textContent=(c.plazoAnios&&c.dejaTrabajar)?("aportas "+c.plazoAnios+" años y dejas trabajar el dinero "+c.dejaTrabajar+" años más"):"";
+  var pn=document.querySelector('[data-live="presu"]'); if(pn) pn.innerHTML=presuNota(c);
+  var st=document.querySelector('[data-live="suenosTotal"]');
+  if(st) st.innerHTML=c.suenosTotal?('Suman <strong style="font-family:var(--f-num);color:var(--ink)">'+money(c.suenosTotal)+'</strong> de capital por construir.'):'';
+  var amts={mes:n(S.fin.ingreso),p10:c.ingresoAnual*0.10,p15:c.ingresoAnual*0.15,p20:c.ingresoAnual*0.20,otro:n(S.traje.presupuestoOtro)};
+  document.querySelectorAll("[data-presuamt]").forEach(function(el){ el.textContent=money(amts[el.dataset.presuamt]); });
+  renderDiag(c); renderWho(c); save();
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener("input",function(e){
+  var t=e.target;
+  if(t.dataset.path){ set(t.dataset.path,t.type==="checkbox"?t.checked:t.value);
+    if(t.dataset.path==="p.nacimiento"&&!S.lv.edadActual) S.lv.edadActual=String(edadDe(t.value)||"");
+    live(); return; }
+  if(t.dataset.dep!==undefined){ S.dep[+t.dataset.dep][t.dataset.k]=t.value; save(); return; }
+  if(t.dataset.sue!==undefined){ S.suenos[+t.dataset.sue][t.dataset.k]=t.value; live(); return; }
+  if(t.dataset.ref!==undefined){ S.ref[+t.dataset.ref]=S.ref[+t.dataset.ref]||{}; S.ref[+t.dataset.ref][t.dataset.k]=t.value; save(); return; }
+});
+document.addEventListener("change",function(e){
+  var t=e.target;
+  if(t.dataset.presu!==undefined){ S.traje.presupuesto=t.value; render(); return; }
+  if(t.dataset.path&&(t.tagName==="SELECT"||t.type==="checkbox"||t.type==="date"||t.type==="time")){ render(); }
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.prio){
+    var id=b.dataset.prio, ix=S.traje.prioridades.indexOf(id);
+    if(ix>=0) S.traje.prioridades.splice(ix,1); else S.traje.prioridades.push(id);
+    render(); return;
+  }
+  if(b.dataset.step!==undefined){ cur=+b.dataset.step; render(); window.scrollTo(0,0); }
+  if(b.id==="next"){ if(cur===STEPS.length-1) window.print(); else { cur++; render(); window.scrollTo(0,0); } }
+  if(b.id==="prev"&&cur>0){ cur--; render(); window.scrollTo(0,0); }
+  if(b.id==="addDep"){ S.dep.push({}); render(); }
+  if(b.id==="addSue"){ S.suenos.push({}); render(); }
+  if(b.dataset.delsue!==undefined){ S.suenos.splice(+b.dataset.delsue,1); render(); }
+  if(b.dataset.deldep!==undefined){ S.dep.splice(+b.dataset.deldep,1); render(); }
+  if(b.id==="btnGuion"||b.id==="guionClose"){ var g=document.getElementById("guionPanel"); g.classList.toggle("open");
+    g.setAttribute("aria-hidden",g.classList.contains("open")?"false":"true");
+    document.getElementById("btnGuion").classList.toggle("on",g.classList.contains("open")); }
+  if(b.id==="btnPresent"){ document.body.classList.toggle("present"); b.classList.toggle("on",document.body.classList.contains("present")); }
+  if(b.id==="btnPrint"){ cur=STEPS.length-1; render(); setTimeout(function(){ window.print(); },80); }
+  if(b.id==="btnSave"){ download(); }
+  if(b.id==="btnLoad"){ document.getElementById("fileIn").click(); }
+  if(b.id==="btnTimer"){ toggleTimer(b); }
+  if(b.id==="btnReset"){ t0=null; elapsed=0; paint(); document.getElementById("btnTimer").textContent="Iniciar"; }
+});
+document.getElementById("fileIn").addEventListener("change",function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){ try{ var o=JSON.parse(r.result); for(var k in o){ if(k in S) S[k]=o[k]; }
+    if(!Array.isArray(S.traje.prioridades)) S.traje.prioridades=[]; cur=0; render(); }
+    catch(err){ alert("No pude leer ese archivo. Debe ser un JSON generado por esta herramienta."); } };
+  r.readAsText(f);
+});
+function download(){
+  var name=(S.p.nombre||"prospecto").replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/g,"").trim().replace(/\s+/g,"_");
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="Asesoria_GAR_"+name+"_"+(S.meta.fecha||"")+".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+}
+var t0=null,elapsed=0,iv=null;
+function paint(){ var s=Math.floor((elapsed+(t0?Date.now()-t0:0))/1000);
+  document.getElementById("clock").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+function toggleTimer(b){
+  if(t0){ elapsed+=Date.now()-t0; t0=null; clearInterval(iv); iv=null; b.textContent="Continuar"; }
+  else { t0=Date.now(); iv=setInterval(paint,500); b.textContent="Pausa"; }
+  paint();
+}
+
+/* ---------- acceso y reporte de actividad ---------- */
+var SES={pin:"",asesor:"",rol:"",sid:"",whats:"",agenda:""};
+try{ SES.pin=localStorage.getItem("gar_pin")||""; SES.asesor=localStorage.getItem("gar_asesor")||"";
+     SES.sid=localStorage.getItem("gar_sid")||""; SES.whats=localStorage.getItem("gar_whats")||"";
+     SES.agenda=localStorage.getItem("gar_agenda")||""; }catch(e){}
+
+var DIAG={ultima:"—",resp:"—",cuando:"—",url:""};
+function conn(estado,texto){
+  var el=document.getElementById("conn"); if(!el) return;
+  el.className="conn "+estado;
+  el.querySelector("b").textContent=texto;
+  el.title = estado==="ok" ? "Conectado. Tu actividad se está registrando. Clic para ver el detalle."
+          : estado==="wait" ? "Contactando al servidor…"
+          : "La app no logra registrar tu actividad. Clic aquí para ver el error exacto.";
+  el.style.cursor="pointer";
+}
+function verDiag(){
+  var ov=document.getElementById("diagOv");
+  if(!ov){
+    ov=document.createElement("div"); ov.id="diagOv"; ov.className="diagov noprint";
+    ov.innerHTML='<div class="diagbox">'
+      +'<h3>Diagnóstico de conexión</h3>'
+      +'<div class="drow"><span>Última petición</span><b id="dg1"></b></div>'
+      +'<div class="drow"><span>Respuesta</span><b id="dg2"></b></div>'
+      +'<div class="drow"><span>Hora</span><b id="dg3"></b></div>'
+      +'<p class="dhint">Abre la dirección de abajo en una pestaña nueva: lo que muestre Google es la causa exacta del fallo.</p>'
+      +'<textarea id="dgUrl" readonly rows="4"></textarea>'
+      +'<div class="dacts"><a id="dgOpen" class="btn" target="_blank" rel="noopener">Abrir en pestaña nueva</a>'
+      +'<button class="btn ghost" type="button" id="dgCopy">Copiar dirección</button>'
+      +'<button class="btn ghost" type="button" id="dgClose">Cerrar</button></div></div>';
+    document.body.appendChild(ov);
+    document.getElementById("dgClose").addEventListener("click",function(){ ov.hidden=true; });
+    ov.addEventListener("click",function(e){ if(e.target===ov) ov.hidden=true; });
+    document.getElementById("dgCopy").addEventListener("click",function(){
+      var t=document.getElementById("dgUrl"); t.select(); t.setSelectionRange(0,99999);
+      try{ document.execCommand("copy"); this.textContent="Copiada"; var b=this;
+           setTimeout(function(){ b.textContent="Copiar dirección"; },1500); }catch(e){}
+    });
+  }
+  document.getElementById("dg1").textContent=DIAG.ultima;
+  document.getElementById("dg2").textContent=DIAG.resp;
+  document.getElementById("dg3").textContent=DIAG.cuando;
+  var u=DIAG.url||API||"(sin dirección)";
+  document.getElementById("dgUrl").value=u;
+  document.getElementById("dgOpen").href=u;
+  ov.hidden=false;
+}
+var _jc=0;
+function jsonp(params,cb){
+  if(!API){ conn("bad","Sin servidor"); cb({ok:false,error:"offline"}); return; }
+  conn("wait","Conectando…");
+  var name="__garcb"+(++_jc), sc=document.createElement("script");
+  DIAG.ultima="action="+(params.action||"?");
+  var to=setTimeout(function(){ fin({ok:false,error:"Sin respuesta en 25 s (el servidor tardó demasiado)."}); },25000);
+  function fin(d){ clearTimeout(to); try{ delete window[name]; }catch(e){ window[name]=undefined; }
+    if(sc.parentNode) sc.parentNode.removeChild(sc);
+    try{ DIAG.resp=JSON.stringify(d); }catch(e){ DIAG.resp=String(d); }
+    DIAG.cuando=new Date().toLocaleTimeString();
+    conn(d&&d.ok?"ok":"bad", d&&d.ok?"Conectado":((d&&d.error)?"Error del servidor":"Sin conexión"));
+    if(cb){ var f=cb; cb=null; f(d); } }
+  window[name]=fin;
+  var q=Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]); }).join("&");
+  sc.src=API+(API.indexOf("?")<0?"?":"&")+q+"&callback="+name;
+  DIAG.url=sc.src;
+  sc.onerror=function(){ fin({ok:false,error:"El navegador no pudo cargar la respuesta (404/403 o contenido bloqueado)."}); };
+  document.body.appendChild(sc);
+}
+function nuevoSid(){ return (SES.pin||"x")+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7); }
+var reportTO=null;
+function report(finSesion){
+  if(!API||!SES.pin) return;
+  if(!SES.sid){ SES.sid=nuevoSid(); try{ localStorage.setItem("gar_sid",SES.sid); }catch(e){} }
+  clearTimeout(reportTO);
+  reportTO=setTimeout(function(){
+    jsonp({action:"ping",pin:SES.pin,sid:SES.sid,paso:cur+1,fin:finSesion?1:0},function(r){
+      if(r&&r.ok) conn("ok","Conectado");
+    });
+  },700);
+}
+setInterval(function(){ if(SES.pin) report(cur===STEPS.length-1); },120000);
+
+function entrar(pin,cb){
+  jsonp({action:"login",pin:pin},function(r){
+    if(r&&r.ok){
+      SES.pin=pin; SES.asesor=r.nombre; SES.rol=r.rol;
+      SES.whats=r.whatsapp||""; SES.agenda=r.agenda||"";
+      if(!SES.sid) SES.sid=nuevoSid();
+      try{ localStorage.setItem("gar_pin",pin); localStorage.setItem("gar_asesor",r.nombre);
+           localStorage.setItem("gar_sid",SES.sid); localStorage.setItem("gar_whats",SES.whats);
+           localStorage.setItem("gar_agenda",SES.agenda); }catch(e){}
+      if(!S.meta.asesor){ S.meta.asesor=r.nombre; }
+      var bp=document.getElementById("btnPanel");
+      if(bp) bp.hidden=(r.rol!=="admin");
+      var bs=document.getElementById("btnSalir"); if(bs) bs.hidden=false;
+      var cn=document.getElementById("conn"); if(cn) cn.title="Conectado como "+r.nombre+". Tu actividad se está registrando.";
+      cerrarGate(); render(); report(false);
+    }
+    cb&&cb(r);
+  });
+}
+function abrirGate(msg){
+  var g=document.getElementById("gate");
+  g.hidden=false; document.body.classList.add("locked");
+  document.getElementById("gateErr").textContent=msg||"";
+  setTimeout(function(){ var i=document.getElementById("pin"); if(i) i.focus(); },60);
+}
+function cerrarGate(){ document.getElementById("gate").hidden=true; document.body.classList.remove("locked"); }
+
+document.getElementById("btnEntrar").addEventListener("click",function(){
+  var v=document.getElementById("pin").value.trim();
+  if(!v){ document.getElementById("gateErr").textContent="Escribe tu PIN."; return; }
+  this.disabled=true; this.textContent="Verificando…";
+  var b=this;
+  entrar(v,function(r){
+    b.disabled=false; b.textContent="Entrar";
+    if(!r||!r.ok) document.getElementById("gateErr").textContent=(r&&r.error)||"No pude verificar tu PIN.";
+  });
+});
+document.getElementById("pin").addEventListener("keydown",function(e){
+  if(e.key==="Enter") document.getElementById("btnEntrar").click();
+});
+document.getElementById("conn").addEventListener("click",verDiag);
+document.getElementById("btnSalir").addEventListener("click",function(){
+  var borrar=confirm("¿Cerrar sesión?\n\nAceptar: cierra tu sesión Y borra de esta computadora los datos del prospecto en pantalla (recomendado en equipos compartidos).\n\nCancelar: no hace nada.");
+  if(!borrar) return;
+  report(true);
+  setTimeout(function(){
+    try{ localStorage.removeItem("gar_pin"); localStorage.removeItem("gar_asesor");
+         localStorage.removeItem("gar_sid"); localStorage.removeItem("gar_whats");
+         localStorage.removeItem("gar_agenda"); localStorage.removeItem(KEY); }catch(e){}
+    location.reload();
+  },900);
+});
+document.getElementById("btnNueva").addEventListener("click",function(){
+  if(!confirm("¿Empezar una asesoría nueva?\n\nSe borra lo capturado en pantalla. Si aún no descargas los datos de este prospecto, cancela y usa primero \"Descargar datos\".")) return;
+  var asesor=S.meta.asesor;
+  S=JSON.parse(DEFAULTS); S.meta.asesor=asesor;
+  SES.sid=nuevoSid(); try{ localStorage.setItem("gar_sid",SES.sid); }catch(e){}
+  cur=0; render(); report(false);
+});
+
+paint(); render();
+
+if(!API) conn("bad","Sin servidor");
+if(API){
+  if(SES.pin){ entrar(SES.pin,function(r){ if(!r||!r.ok) abrirGate(r&&r.error!=="offline"?(r.error||""):""); }); }
+  else abrirGate("");
+}
+})();
+</script>
+
+</body>
+</html>
