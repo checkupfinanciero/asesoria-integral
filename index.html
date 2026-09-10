@@ -180,6 +180,16 @@ table.rep td:last-child,table.rep th:last-child{padding-right:0}
 .btn.ghost:hover{border-color:var(--ink-3);color:var(--ink);filter:none}
 
 /* prioridades */
+.h3sub{font-weight:500;letter-spacing:.02em;text-transform:none;color:var(--ink-3);font-size:.82em}
+.detprio{display:grid;gap:12px}
+.dp{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:12px 14px;background:var(--surface-2,var(--surface))}
+.dph{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.dpn{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#231000;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.dpi{font-size:15px;line-height:1}
+.dph b{font-size:14.5px;color:var(--ink)}
+.dp label{display:block;font-size:12.5px;color:var(--ink-2);margin-bottom:5px}
+.dp textarea{width:100%}
+
 .prios{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px}
 .prio{position:relative;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;cursor:pointer;text-align:left;color:var(--ink-2);font-size:14.5px;transition:border-color .12s,background .12s}
 .prio:hover{border-color:var(--ink-3);color:var(--ink)}
@@ -387,6 +397,10 @@ body.present .app{grid-template-columns:minmax(0,1fr) 380px}
 #onepage .op-fin .v.sm{font-size:10.4pt;font-family:var(--f-body);font-weight:600;color:#fff;letter-spacing:0}
 #onepage .op-fin .n{font-size:7.7pt;color:#96AECB;margin-top:2px}
 #onepage .prios2{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+#onepage .op-notas{margin-top:7px;border-top:1px solid #2F4A70;padding-top:6px;display:grid;gap:3px}
+#onepage .op-notas div{display:flex;gap:7px;font-size:8.4pt;line-height:1.32}
+#onepage .op-notas b{color:var(--op-acc);white-space:nowrap;flex:0 0 auto}
+#onepage .op-notas span{color:#E4EDF9}
 #onepage .prios2 span{border:1px solid #2F4A70;border-radius:99px;padding:2px 8px;font-size:8.6pt;color:#E4EDF9}
 #onepage .prios2 span b{color:var(--op-acc)}
 #onepage .contacto{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:11px;
@@ -492,7 +506,8 @@ var S = {
   lv:{edadInicio:"",edadActual:"",jubilacion:"65",esperanza:"85",primerIngreso:"",pctAhorro:"10",
       necMensual:"",aniosGastos:"7",aniosIngresos:"7",metaDesc:"",metaMonto:"",pctRetiro:"70"},
   suenos:[],
-  traje:{prioridades:[],plazo:"",plazoOtro:"",moneda:"MXN",deducible:"No",presupuesto:"",presupuestoOtro:""},
+  traje:{prioridades:[],notas:{},plazo:"",plazoOtro:"",moneda:"MXN",deducible:"No",presupuesto:"",presupuestoOtro:"",
+         salud:{ded:"",dedOtro:"",indem:false}},
   cierre:{fecha:"",hora:"",acompania:"",llevas:"",valor:"",compromisos:"Presentar una solución a la medida.\nSer tu agente de seguros y darte apoyo y asesoría cuando lo necesites."},
   ref:[{},{},{},{},{},{}]
 };
@@ -501,6 +516,8 @@ var DEFAULTS=JSON.stringify(S);
 var KEY="gar_asesoria_online_v2";
 try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); for(var k in o){ if(k in S) S[k]=o[k]; } } }catch(e){}
 if(!Array.isArray(S.traje.prioridades)) S.traje.prioridades=[];
+if(!S.traje.notas||typeof S.traje.notas!=="object") S.traje.notas={};
+if(!S.traje.salud||typeof S.traje.salud!=="object") S.traje.salud={ded:"",dedOtro:"",indem:false};
 if(!Array.isArray(S.suenos)) S.suenos=[];
 if(!S.suenos.length && (S.lv.metaDesc||S.lv.metaMonto)){          // migra la meta única de versiones anteriores
   S.suenos.push({nombre:S.lv.metaDesc||"",monto:S.lv.metaMonto||"",anios:""});
@@ -548,17 +565,88 @@ function syncEdad(iso){ var e=edadDe(iso); if(e) S.lv.edadActual=String(e); }
 
 /* ---------- catálogos ---------- */
 var PRIORIDADES=[
- {id:"proteccion",  t:"Protección",         ic:"🛡️"},
- {id:"ahorro",      t:"Ahorro / Retiro",    ic:"🐷"},
- {id:"protahorro",  t:"Protección y ahorro",ic:"🎯"},
- {id:"educacion",   t:"Educación",          ic:"🎓"},
- {id:"salud",       t:"Salud / GMM",        ic:"🏥"},
- {id:"metas",       t:"Metas",              ic:"✨"},
- {id:"auto",        t:"Auto",               ic:"🚗"},
- {id:"hogar",       t:"Hogar",              ic:"🏠"},
- {id:"mascota",     t:"Mascota",            ic:"🐾"},
- {id:"empresa",     t:"Empresarial",        ic:"💼"}
+ {id:"proteccion", t:"Protección", ic:"🛡️",
+  q:"¿A quién hay que proteger y qué debe resolverse si él falta?",
+  ph:"Ej. esposa y dos hijos · que no les falte el ingreso 10 años y quede libre la hipoteca"},
+ {id:"ahorro", t:"Ahorro / Retiro", ic:"🐷",
+  q:"¿Para qué es ese ahorro y qué ingreso quiere tener al retirarse?",
+  ph:"Ej. retirarse a los 65 con $35,000 al mes, además del IMSS"},
+ {id:"protahorro", t:"Protección y ahorro", ic:"🎯",
+  q:"¿Qué pesa más hoy, proteger o acumular? ¿En qué proporción?",
+  ph:"Ej. 60% protección mientras los hijos estudian, 40% ahorro"},
+ {id:"educacion", t:"Educación", ic:"🎓",
+  q:"¿Para quién, y a qué universidad le gustaría que accediera?",
+  ph:"Ej. Sofía, 8 años · Tec de Monterrey, carrera de 4 años, campus Querétaro"},
+ {id:"salud", t:"Salud / GMM", ic:"🏥",
+  q:"¿Qué deducible máximo podría cubrir de su bolsa en una emergencia médica?",
+  ph:"Ej. hasta $40,000 sin descapitalizarse · hospitales de preferencia: Ángeles y San José"},
+ {id:"metas", t:"Metas", ic:"✨",
+  q:"¿Qué meta concreta, de cuánto y para cuándo?",
+  ph:"Ej. enganche de casa, $600,000 en 6 años"},
+ {id:"auto", t:"Auto", ic:"🚗",
+  q:"¿Qué vehículos tiene y cómo están asegurados hoy?",
+  ph:"Ej. Mazda CX-5 2023 y Versa 2019 · solo responsabilidad civil, vence en marzo"},
+ {id:"hogar", t:"Hogar", ic:"🏠",
+  q:"¿Qué inmueble y qué le preocupa proteger de él?",
+  ph:"Ej. casa propia en Querétaro, valor $3.5M · contenidos, sismo y responsabilidad civil"},
+ {id:"mascota", t:"Mascota", ic:"🐾",
+  q:"¿Qué mascota y qué gasto le preocupa cubrir?",
+  ph:"Ej. labrador de 3 años · urgencias, cirugías y consultas"},
+ {id:"empresa", t:"Empresarial", ic:"💼",
+  q:"¿Qué necesita resolver la empresa: socios, personal clave o continuidad?",
+  ph:"Ej. 12 empleados · seguro de socio clave y GMM colectivo para el equipo directivo"}
 ];
+/** Un campo de detalle por cada prioridad marcada, en el orden elegido. */
+function detallePrio(){
+  var ids=S.traje.prioridades||[];
+  if(!ids.length) return "";
+  return '<div class="card"><h3>Detalle de cada prioridad</h3>'
+   +'<p class="note" style="margin-top:0;margin-bottom:14px">Anota aquí, en sus palabras, el dato que hará concreta cada prioridad. Es lo que vuelve cotizable la segunda cita.</p>'
+   +'<div class="detprio">'+ids.map(function(id,ix){
+      var o=prioT(id), v=(S.traje.notas&&S.traje.notas[id])||"";
+      return '<div class="dp">'
+        +'<div class="dph"><span class="dpn">'+(ix+1)+'</span><span class="dpi">'+o.ic+'</span><b>'+esc(o.t)+'</b></div>'
+        +'<label for="dp_'+id+'">'+esc(o.q||"¿Qué hay que saber de esta prioridad?")+'</label>'
+        +'<textarea id="dp_'+id+'" rows="2" data-prionota="'+id+'" placeholder="'+esc(o.ph||"")+'">'+esc(v)+'</textarea>'
+        +'</div>';
+    }).join("")+'</div></div>';
+}
+/** Las notas capturadas, listas para el resumen y el PDF. */
+function notasLista(){
+  return (S.traje.prioridades||[]).map(function(id,ix){
+    var v=((S.traje.notas||{})[id]||"").trim();
+    return v?{n:ix+1,o:prioT(id),v:v}:null;
+  }).filter(Boolean);
+}
+/** Bloque del plan de salud para el resumen y el PDF. */
+function saludActiva(){ return (S.traje.prioridades||[]).indexOf("salud")>=0; }
+function saludResumen(){
+  if(!saludActiva()) return "";
+  var d=dedElegido(), sa=S.traje.salud||{};
+  return '<dl class="kv" style="margin-top:18px">'
+   +'<dt>🏥 Deducible acordado</dt><dd>'+(d.monto?money(d.monto)+' · '+esc(d.texto):esc(d.texto))+'</dd>'
+   +(sa.indem?'<dt>Indemnización</dt><dd>Le interesa recibir una indemnización económica ante problemas de salud.</dd>':'')
+   +'</dl>';
+}
+function saludOnePage(){
+  if(!saludActiva()) return "";
+  var d=dedElegido(), sa=S.traje.salud||{};
+  var txt=(d.monto?money(d.monto)+" — "+d.texto:d.texto)+(sa.indem?" · le interesa la indemnización económica":"");
+  return '<div><b>Plan de salud</b><span>'+esc(txt)+'</span></div>';
+}
+function notasOnePage(){
+  var L=notasLista(); if(!L.length&&!saludActiva()) return "";
+  var filas=L.map(function(x){
+    return '<div><b>'+x.n+' · '+esc(x.o.t)+'</b><span>'+esc(x.v)+'</span></div>';
+  }).join("")+saludOnePage();
+  return filas?'<div class="op-notas">'+filas+'</div>':"";
+}
+function notasResumen(){
+  var L=notasLista(); if(!L.length) return "";
+  return '<dl class="kv" style="margin-top:18px">'+L.map(function(x){
+    return '<dt>'+x.o.ic+' '+esc(x.o.t)+'</dt><dd>'+esc(x.v)+'</dd>';
+  }).join("")+'</dl>';
+}
 function prioT(id){ for(var i=0;i<PRIORIDADES.length;i++) if(PRIORIDADES[i].id===id) return PRIORIDADES[i]; return {t:id,ic:""}; }
 
 var ETAPAS=[
@@ -874,14 +962,15 @@ function stepHTML(i,c){
      +(S.traje.prioridades.length?'<div class="priolist">'+S.traje.prioridades.map(function(id,ix){var o=prioT(id);return '<span class="pill"><b>'+(ix+1)+'</b>'+o.ic+" "+esc(o.t)+'</span>';}).join("")+'</div>'
        :'<p class="note" style="margin-top:16px">Toca una o varias tarjetas. El orden en que las tocas define la prioridad.</p>')
    +'</div>'
-   +'<div class="card"><h3>Condiciones del plan</h3><div class="grid g3">'
+   +detallePrio()
+   +'<div class="card"><h3>Condiciones del plan <span class="h3sub">(vida / ahorro / inversión)</span></h3><div class="grid g3">'
      +fld("traje.plazo","Plazo · ¿cuántos años te gustaría estar aportando?",{options:[{v:"",t:"Elige un plazo…"}].concat(PLAZOS),span2:true})
      +fld("traje.plazoOtro","Si elegiste “Otro”, especifica")
      +fld("traje.moneda","Moneda",{options:["MXN","USD","UDI"]})
      +fld("traje.deducible","¿Deducible de impuestos?",{options:["No","Sí"]})
      +'<div class="f"><label>Plazo elegido</label><input class="ro" readonly data-live="plazo" value="'+esc(plazoTexto(c))+'"><span class="hint" data-live="plazoHint">'+esc(c.plazoAnios&&c.dejaTrabajar?"aportas "+c.plazoAnios+" años y dejas trabajar el dinero "+c.dejaTrabajar+" años más":"")+'</span></div>'
    +'</div></div>'
-   +'<div class="card"><h3>Cada año podrías aportar</h3><div class="grid g2">'
+   +'<div class="card"><h3>¿Cuánto podrías aportar al año? <span class="h3sub">(vida / ahorro / inversión)</span></h3><div class="grid g2">'
      +presuOpt("mes","Un mes de tu ingreso",n(S.fin.ingreso))
      +presuOpt("p10","El 10% de tu ingreso anual",c.ingresoAnual*0.10)
      +presuOpt("p15","El 15% de tu ingreso anual",c.ingresoAnual*0.15)
@@ -889,7 +978,8 @@ function stepHTML(i,c){
    +'</div><div class="grid g2" style="margin-top:14px">'
      +presuOpt("otro","Otra cantidad superior",n(S.traje.presupuestoOtro))
      +fld("traje.presupuestoOtro","Cantidad",{money:true})
-   +'</div><p class="note" style="margin-top:16px" data-live="presu">'+presuNota(c)+'</p></div>';
+   +'</div><p class="note" style="margin-top:16px" data-live="presu">'+presuNota(c)+'</p></div>'
+   +planSalud(c);
 
   case 7: return ''
    +'<div class="eyebrow">Etapa 4 · Priorizar</div><h2>Mi compromiso contigo</h2>'
@@ -930,6 +1020,8 @@ function stepHTML(i,c){
      +(S.traje.prioridades.length
         ?'<div class="priolist" style="margin-top:0">'+S.traje.prioridades.map(function(id,ix){var o=prioT(id);return '<span class="pill"><b>'+(ix+1)+'</b>'+o.ic+" "+esc(o.t)+'</span>';}).join("")+'</div>'
         :'<p class="note">Sin prioridades marcadas.</p>')
+     +notasResumen()
+     +saludResumen()
      +'<dl class="kv" style="margin-top:18px">'
        +'<dt>Presupuesto</dt><dd>'+money(c.presupuesto)+' al año'+(c.presupuesto?' · '+money(c.presupuesto/12)+' al mes':'')+'</dd>'
        +'<dt>Plazo de aportación</dt><dd>'+esc(plazoTexto(c))+'</dd>'
@@ -961,6 +1053,54 @@ function stepHTML(i,c){
 function leyenda(){ return '<div class="legend" style="margin-bottom:16px"><span><i style="background:var(--data)"></i>Ya cubierto</span><span><i style="background:var(--gap)"></i>Brecha</span></div>'; }
 function presuNota(c){
   return 'Presupuesto elegido: <strong style="font-family:var(--f-num);color:var(--gold)">'+money(c.presupuesto)+'</strong> al año'+(c.presupuesto?' · '+money(c.presupuesto/12)+' al mes':'');
+}
+/* ---------- plan de salud (aparece solo si Salud/GMM es prioridad) ---------- */
+function dedMonto(v){
+  var ing=n(S.fin.ingreso);
+  if(v==="min") return ing;
+  if(v==="max") return ing*2;
+  if(v==="otro") return n(S.traje.salud.dedOtro);
+  return 0;
+}
+function dedElegido(){
+  var sa=S.traje.salud||{};
+  if(sa.indem&&!sa.ded) return {texto:"Solo indemnización económica",monto:0};
+  if(!sa.ded) return {texto:"por definir",monto:0};
+  var t=sa.ded==="min"?"Deducible mínimo · 1 mes de ingreso"
+       :sa.ded==="max"?"Deducible máximo · 2 meses de ingreso"
+       :"Otra cantidad de deducible";
+  return {texto:t,monto:dedMonto(sa.ded)};
+}
+function saludNota(){
+  var d=dedElegido(), sa=S.traje.salud||{};
+  var t='Deducible elegido: <strong style="font-family:var(--f-num);color:var(--gold)">'
+       +(d.monto?money(d.monto):esc(d.texto))+'</strong>'+(d.monto?' · '+esc(d.texto):'');
+  if(sa.indem) t+=' · <strong>además, le interesa la indemnización económica</strong>';
+  return t;
+}
+function dedOpt(v,label,amount){
+  var on=(S.traje.salud||{}).ded===v;
+  return '<label class="chk" style="border:1px solid '+(on?"var(--accent)":"var(--line)")+';border-radius:10px;padding:13px 15px;cursor:pointer;background:'+(on?"rgba(249,115,22,.12)":"transparent")+'">'
+   +'<input type="radio" name="salded" value="'+v+'" data-salded'+(on?" checked":"")+'>'
+   +'<span><span style="display:block;color:var(--ink);font-weight:500">'+esc(label)+'</span>'
+   +'<span style="font-family:var(--f-num);font-size:18px;color:var(--gold);display:block;margin-top:3px" data-saldedamt="'+v+'">'+money(amount)+'</span></span></label>';
+}
+function planSalud(c){
+  if((S.traje.prioridades||[]).indexOf("salud")<0) return "";
+  var sa=S.traje.salud||{}, ing=n(S.fin.ingreso);
+  return '<div class="card"><h3>🏥 Condiciones del plan de salud</h3>'
+   +'<p class="note" style="margin-top:0;margin-bottom:14px">¿Cuánto podría poner de su bolsa antes de que entre el seguro? El deducible se calcula sobre su ingreso mensual, para que la cifra tenga sentido con lo que gana.</p>'
+   +'<div class="grid g2">'
+     +dedOpt("min","Deducible mínimo · un mes de tu ingreso",ing)
+     +dedOpt("max","Deducible máximo · dos meses de tu ingreso",ing*2)
+   +'</div><div class="grid g2" style="margin-top:14px">'
+     +dedOpt("otro","Otra cantidad de deducible",n(sa.dedOtro))
+     +fld("traje.salud.dedOtro","Cantidad",{money:true})
+   +'</div>'
+   +'<label class="chk" style="margin-top:16px;border:1px solid '+(sa.indem?"var(--accent)":"var(--line)")+';border-radius:10px;padding:13px 15px;cursor:pointer;background:'+(sa.indem?"rgba(249,115,22,.12)":"transparent")+'">'
+     +'<input type="checkbox" data-salindem'+(sa.indem?" checked":"")+'>'
+     +'<span style="color:var(--ink);font-weight:500">Me interesa solo recibir una indemnización económica ante problemas de salud</span></label>'
+   +'<p class="note" style="margin-top:16px" data-live="salud">'+saludNota()+'</p></div>';
 }
 function presuOpt(v,label,amount){
   var on=S.traje.presupuesto===v;
@@ -1086,7 +1226,7 @@ function onePage(c){
       +'<div class="n">'+(c.presupuesto? money(c.presupuesto/12)+" al mes":"por definir")+'</div></div>'
     +'<div><div class="k">Plazo de aportación</div><div class="v sm">'+esc(plazoTexto(c))+'</div>'
       +'<div class="n">'+(S.cierre.fecha? "Próxima reunión: "+esc(fecha(S.cierre.fecha))+(S.cierre.hora?" · "+esc(S.cierre.hora)+" h":"") : "Próxima reunión por agendar")+'</div></div>'
-  +'</div>'+contactoHTML()+'</div>'
+  +'</div>'+notasOnePage()+contactoHTML()+'</div>'
 
   +'<div class="op-pie"><span>Documento confidencial · elaborado para '+esc(S.p.nombre||"el prospecto")+'</span>'
     +'<span>Brecha total detectada: '+money(c.brechaTotal)+'</span></div>';
@@ -1185,6 +1325,8 @@ function live(){
   if(st) st.innerHTML=c.suenosTotal?('Suman <strong style="font-family:var(--f-num);color:var(--ink)">'+money(c.suenosTotal)+'</strong> de capital por construir.'):'';
   var amts={mes:n(S.fin.ingreso),p10:c.ingresoAnual*0.10,p15:c.ingresoAnual*0.15,p20:c.ingresoAnual*0.20,otro:n(S.traje.presupuestoOtro)};
   document.querySelectorAll("[data-presuamt]").forEach(function(el){ el.textContent=money(amts[el.dataset.presuamt]); });
+  document.querySelectorAll("[data-saldedamt]").forEach(function(el){ el.textContent=money(dedMonto(el.dataset.saldedamt)); });
+  var sn=document.querySelector('[data-live="salud"]'); if(sn) sn.innerHTML=saludNota();
   renderDiag(c); renderWho(c); save();
 }
 
@@ -1194,6 +1336,7 @@ document.addEventListener("input",function(e){
   if(t.dataset.path){ set(t.dataset.path,t.type==="checkbox"?t.checked:t.value);
     if(t.dataset.path==="p.nacimiento") syncEdad(t.value);
     live(); return; }
+  if(t.dataset.prionota){ S.traje.notas[t.dataset.prionota]=t.value; save(); return; }
   if(t.dataset.dep!==undefined){ S.dep[+t.dataset.dep][t.dataset.k]=t.value; save(); return; }
   if(t.dataset.sue!==undefined){ S.suenos[+t.dataset.sue][t.dataset.k]=t.value; live(); return; }
   if(t.dataset.ref!==undefined){ S.ref[+t.dataset.ref]=S.ref[+t.dataset.ref]||{}; S.ref[+t.dataset.ref][t.dataset.k]=t.value; save(); return; }
@@ -1201,6 +1344,8 @@ document.addEventListener("input",function(e){
 document.addEventListener("change",function(e){
   var t=e.target;
   if(t.dataset.presu!==undefined){ S.traje.presupuesto=t.value; render(); return; }
+  if(t.dataset.salded!==undefined){ S.traje.salud.ded=t.value; render(); return; }
+  if(t.dataset.salindem!==undefined){ S.traje.salud.indem=t.checked; render(); return; }
   if(t.dataset.path&&(t.type==="date"||t.type==="time")){
     set(t.dataset.path,t.value);
     if(t.dataset.path==="p.nacimiento") syncEdad(t.value);
@@ -1236,7 +1381,10 @@ document.getElementById("fileIn").addEventListener("change",function(e){
   var f=e.target.files[0]; if(!f) return;
   var r=new FileReader();
   r.onload=function(){ try{ var o=JSON.parse(r.result); for(var k in o){ if(k in S) S[k]=o[k]; }
-    if(!Array.isArray(S.traje.prioridades)) S.traje.prioridades=[]; cur=0; render(); }
+    if(!Array.isArray(S.traje.prioridades)) S.traje.prioridades=[];
+    if(!S.traje.notas||typeof S.traje.notas!=="object") S.traje.notas={};
+    if(!S.traje.salud||typeof S.traje.salud!=="object") S.traje.salud={ded:"",dedOtro:"",indem:false};
+    cur=0; render(); }
     catch(err){ alert("No pude leer ese archivo. Debe ser un JSON generado por esta herramienta."); } };
   r.readAsText(f);
 });
